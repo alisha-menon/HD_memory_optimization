@@ -68,13 +68,31 @@ COMPLETE_1_v_ECG=features_ECG;
 COMPLETE_1_a_ECG=features_ECG;
 COMPLETE_1_v_EEG=features_EEG;
 COMPLETE_1_a_EEG=features_EEG;
-
-D_full = [2000]; %dimension of the hypervectors
+randCounter = 50;
+acc_matrix = zeros(10);
+acc_matrix = [acc_matrix;acc_matrix];
+D_full = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]; %dimension of the hypervectors
+while (randCounter > 0)
 for j=1:length(D_full)
 learningFrac = learningrate(1); 
 learningFrac;
 D=D_full(j);
 D
+randCounter
+
+
+iMch1_array = zeros(channels_v, D);
+projM1_pos = zeros(channels_v, D);
+projM1_neg = zeros(channels_v, D);
+
+iMch3_array = zeros(channels_v_ECG, D);
+projM3_pos = zeros(channels_v_ECG, D);
+projM3_neg = zeros(channels_v_ECG, D);
+
+iMch5_array = zeros(channels_v_EEG, D);
+projM5_pos = zeros(channels_v_EEG, D);
+projM5_neg = zeros(channels_v_EEG, D);
+
 classes = 2; % level of classes
 precision = 20; %no use
 ngram = 3; % for temporal encode
@@ -97,6 +115,8 @@ end
 for i=1:1:channels_v
     iMch1(i) = iMch5(i);
 end
+
+
 [chAM7, iMch7] = initItemMemories (D, maxL, channels_v_EXG);
 [chAM8, iMch8] = initItemMemories (D, maxL, channels_a_EXG);
 
@@ -208,8 +228,13 @@ for i = 1:1:channels_v
     proj3_p = i;
     proj5_n = i;
     proj5_p = i;
-    x = randperm(105,1);
-    %y = randperm(105,1);
+    count = randCounter;
+    while (count>0)
+            x = randperm(105,1);
+            count = count - 1;
+ 
+    end
+    y = randperm(105,1);
     while (proj1_n == i)
         proj1_n = randperm(105,1);
     end
@@ -297,6 +322,8 @@ end
 
 accuracy(N,2) = acc2;
 acc2
+acc_matrix((randCounter*2),(D/1000)) = acc2;
+
  
 %acc_ngram_1(N,j)=acc1;
 acc_ngram_A(N,j)=acc2;
@@ -326,6 +353,7 @@ end
 
 accuracy(N,2) = acc1;
 acc1
+acc_matrix((randCounter*2-1),(D/1000)) = acc1;
 
 %acc_ngram_1(N,j)=acc1;
 acc_ngram_V(N,j)=acc1;
@@ -343,7 +371,9 @@ for i = 1:1:length(1:ngram)
 end
 
 end
-
+randCounter = randCounter-1;
+end
+acc_matrix
 iMfull = [];
 for i = 1:1:iMch5.Count
     iMfull = [iMfull iMch5(i)]; %#ok<AGROW>
@@ -364,4 +394,3 @@ dim = x(1);
 for i = 1:1:dim
     projM_neg_full = [projM_neg_full projM5_neg(i,:)]; %#ok<AGROW>
 end
-

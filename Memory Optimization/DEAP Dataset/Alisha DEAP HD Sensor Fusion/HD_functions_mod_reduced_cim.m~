@@ -1,5 +1,5 @@
 
-function message = HD_functions_modified
+function message = HD_functions_mod_reduced_cim
   assignin('base','genBRandomHV', @genBRandomHV); 
   assignin('base','projBRandomHV', @projBRandomHV); 
   assignin('base','initItemMemories', @initItemMemories);
@@ -654,8 +654,7 @@ function [accExcTrnz, accuracy, predicLabel, actualLabel, all_error] = hdcpredic
 
   
 end
-function [numPat, AM] = hdctrainproj (classes, labelTrainSet1, labelTrainSet2, labelTrainSet3, labelTrainSet4, labelTrainSet5, trainSet1, trainSet2, trainSet3, trainSet4, trainSet5, CiM, iM1, iM2, iM3, iM4, iM5, D, N, precision, channels1, channels2, channels3, channels4, channels5, projM1_pos, projM1_neg, projM2_pos, projM2_neg, projM3_pos, projM3_neg, projM4_pos, projM4_neg, projM5_pos, projM5_neg) 
-%
+function [numPat, AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, trainSet3, trainSet4, trainSet5, CiM1, CiM2, CiM3, CiM4, CiM5, iM1, iM2, iM3, iM4, iM5, D, N, precision, channels1, channels2, channels3, channels4, channels5)
 % DESCRIPTION   : train an associative memory based on input training data
 %
 % INPUTS:
@@ -686,82 +685,82 @@ function [numPat, AM] = hdctrainproj (classes, labelTrainSet1, labelTrainSet2, l
     
     while i < length(labelTrainSet1)-N+1
        	if labelTrainSet1(i) == label  
-        %creates ngram for label    
-        %instead want to compute ngram which is fused, keep going if all
-        %of the labels for the modalities are the same. Once one changes,
-        %stop bundling and move onto the next sample for the next label for
-        %all modalities
-        %setup first Ngram
-	    v1 = computeNgramproj (trainSet1 (i : i+N-1,:), CiM, N, precision, iM1, channels1,projM1_pos, projM1_neg, 1,D);
-        v2 = computeNgramproj (trainSet2 (i : i+N-1,:), CiM, N, precision, iM2, channels2,projM2_pos, projM2_neg, 1,D);
-        v3 = computeNgramproj (trainSet3 (i : i+N-1,:), CiM, N, precision, iM3, channels3,projM3_pos, projM3_neg, 1,D);
-        v4 = computeNgramproj (trainSet4 (i : i+N-1,:), CiM, N, precision, iM4, channels4,projM4_pos, projM4_neg, 1,D);
-        v5 = computeNgramproj (trainSet5 (i : i+N-1,:), CiM, N, precision, iM5, channels5,projM5_pos, projM5_neg, 1,D);
-        if channels1==1
-            ngram1 = v1;
-        else
-            ngram1 = mode(v1);
-        end
-        if channels2==1
-            ngram2 = v2;
-        else
-            ngram2 = mode(v2);
-        end
-        if channels3==1
-            ngram3 = v3;
-        else
-            ngram3 = mode(v3);
-        end
-        if channels4==1
-            ngram4 = v4;
-        else
-            ngram4 = mode(v4);
-        end
-        if channels5==1
-            ngram5 = v5;
-        else
-            ngram5 = mode(v5);
-        end
-        ngram=mode([ngram1;ngram2;ngram3;ngram4;ngram5]);
-        for sample_index = 2:1:N
-            v1 = computeNgramproj (trainSet1 (i : i+N-1,:), CiM, N, precision, iM1, channels1,projM1_pos, projM1_neg, sample_index,D);
+            %creates ngram for label    
+            %instead want to compute ngram which is fused, keep going if all
+            %of the labels for the modalities are the same. Once one changes,
+            %stop bundling and move onto the next sample for the next label for
+            %all modalities
+            %setup first Ngram
+            v1 = computeNgramproj (trainSet1 (i : i+N-1,:), CiM1, N, precision, iM1, channels1,1,D);
+            v2 = computeNgramproj (trainSet2 (i : i+N-1,:), CiM2, N, precision, iM2, channels2,1,D);
+            v3 = computeNgramproj (trainSet3 (i : i+N-1,:), CiM3, N, precision, iM3, channels3,1,D);
+            v4 = computeNgramproj (trainSet4 (i : i+N-1,:), CiM4, N, precision, iM4, channels4,1,D);
+            v5 = computeNgramproj (trainSet5 (i : i+N-1,:), CiM5, N, precision, iM5, channels5,1,D);
             if channels1==1
-                record1 = v1;          
+                ngram1 = v1;
             else
-                record1 = mode(v1); 
+                ngram1 = mode(v1);
             end
-            v2 = computeNgramproj (trainSet2 (i : i+N-1,:), CiM, N, precision, iM2, channels2,projM2_pos, projM2_neg, sample_index,D);
             if channels2==1
-                record2 = v2;          
+                ngram2 = v2;
             else
-                record2 = mode(v2); 
+                ngram2 = mode(v2);
             end
-            v3 = computeNgramproj (trainSet3 (i : i+N-1,:), CiM, N, precision, iM3, channels3,projM3_pos, projM3_neg, sample_index,D);
             if channels3==1
-                record3 = v3;          
+                ngram3 = v3;
             else
-                record3 = mode(v3); 
+                ngram3 = mode(v3);
             end
-            v4 = computeNgramproj (trainSet4 (i : i+N-1,:), CiM, N, precision, iM4, channels4,projM4_pos, projM4_neg, sample_index,D);
             if channels4==1
-                record4 = v4;          
+                ngram4 = v4;
             else
-                record4 = mode(v4); 
+                ngram4 = mode(v4);
             end
-            v5 = computeNgramproj (trainSet5 (i : i+N-1,:), CiM, N, precision, iM5, channels5,projM5_pos, projM5_neg, sample_index,D);
             if channels5==1
-                record5 = v5;          
+                ngram5 = v5;
             else
-                record5 = mode(v5); 
+                ngram5 = mode(v5);
             end
-            record = mode([record1;record2;record3;record4;record5]);
-            circ = circshift (ngram, [1,1]);
-            circ(1) = 0;
-            ngram = xor(circ , record);
-        end
+            ngram=mode([ngram1;ngram2;ngram3;ngram4;ngram5]);
+            for sample_index = 2:1:N
+                v1 = computeNgramproj (trainSet1 (i : i+N-1,:), CiM1, N, precision, iM1, channels1,sample_index,D);
+                if channels1==1
+                    record1 = v1;          
+                else
+                    record1 = mode(v1); 
+                end
+                v2 = computeNgramproj (trainSet2 (i : i+N-1,:), CiM2, N, precision, iM2, channels2,sample_index,D);
+                if channels2==1
+                    record2 = v2;          
+                else
+                    record2 = mode(v2); 
+                end
+                v3 = computeNgramproj (trainSet3 (i : i+N-1,:), CiM3, N, precision, iM3, channels3,sample_index,D);
+                if channels3==1
+                    record3 = v3;          
+                else
+                    record3 = mode(v3); 
+                end
+                v4 = computeNgramproj (trainSet4 (i : i+N-1,:), CiM4, N, precision, iM4, channels4,sample_index,D);
+                if channels4==1
+                    record4 = v4;          
+                else
+                    record4 = mode(v4); 
+                end
+                v5 = computeNgramproj (trainSet5 (i : i+N-1,:), CiM5, N, precision, iM5, channels5,sample_index,D);
+                if channels5==1
+                    record5 = v5;          
+                else
+                    record5 = mode(v5); 
+                end
+                record = mode([record1;record2;record3;record4;record5]);
+                circ = circshift (ngram, [1,1]);
+                circ(1) = 0;
+                ngram = xor(circ , record);
+            end
             trainVecList = [trainVecList ; ngram];
-	        %numPat (labelTrainSet1 (i+N-1)) = numPat (labelTrainSet1 (i+N-1)) + 1;
-            
+                %numPat (labelTrainSet1 (i+N-1)) = numPat (labelTrainSet1 (i+N-1)) + 1;
+
             i = i + 1;
         else
             %once you reach the end of that label, do majority count and
@@ -789,7 +788,7 @@ function [numPat, AM] = hdctrainproj (classes, labelTrainSet1, labelTrainSet2, l
     end
 end
 
-function [accExcTrnz, accuracy, predicLabel, actualLabel, all_error] = hdcpredictproj (labelTestSet1, testSet1, labelTestSet2, testSet2, labelTestSet3, testSet3, labelTestSet4, testSet4 , labelTestSet5, testSet5 , AM, CiM, iM1, iM2, iM3, iM4, iM5, D, N, precision, classes, channels1, channels2, channels3, channels4, channels5, projM1_pos, projM1_neg, projM2_pos, projM2_neg, projM3_pos, projM3_neg, projM4_pos, projM4_neg, projM5_pos, projM5_neg) 
+function [accExcTrnz, accuracy, predicLabel, actualLabel, all_error] = hdcpredictproj (labelTestSet1, testSet1, testSet2, testSet3, testSet4, testSet5 , AM, CiM1, CiM2, CiM3, CiM4, CiM5, iM1, iM2, iM3, iM4, iM5, D, N, precision, classes, channels1, channels2, channels3, channels4, channels5) 
 %
 % DESCRIPTION   : test accuracy based on input testing data
 %
@@ -818,11 +817,11 @@ function [accExcTrnz, accuracy, predicLabel, actualLabel, all_error] = hdcpredic
 		numTests = numTests + 1;
 		actualLabel(i : i+N-1,:) = mode(labelTestSet1 (i : i+N-1));
         %% setup first Ngram for all modalities
-        v1 = computeNgramproj (testSet1 (i : i+N-1,:), CiM, N, precision, iM1, channels1,projM1_pos, projM1_neg,1,D);
-        v2 = computeNgramproj (testSet2 (i : i+N-1,:), CiM, N, precision, iM2, channels2,projM2_pos, projM2_neg,1,D);
-        v3 = computeNgramproj (testSet3 (i : i+N-1,:), CiM, N, precision, iM3, channels3,projM3_pos, projM3_neg,1,D);
-        v4 = computeNgramproj (testSet4 (i : i+N-1,:), CiM, N, precision, iM4, channels4,projM4_pos, projM4_neg, 1,D);
-        v5 = computeNgramproj (testSet5 (i : i+N-1,:), CiM, N, precision, iM5, channels5,projM5_pos, projM5_neg, 1,D);
+        v1 = computeNgramproj (testSet1 (i : i+N-1,:), CiM1, N, precision, iM1, channels1,1,D);
+        v2 = computeNgramproj (testSet2 (i : i+N-1,:), CiM2, N, precision, iM2, channels2,1,D);
+        v3 = computeNgramproj (testSet3 (i : i+N-1,:), CiM3, N, precision, iM3, channels3,1,D);
+        v4 = computeNgramproj (testSet4 (i : i+N-1,:), CiM4, N, precision, iM4, channels4,1,D);
+        v5 = computeNgramproj (testSet5 (i : i+N-1,:), CiM5, N, precision, iM5, channels5,1,D);
         
         if channels1==1
             sigHV1 = v1;
@@ -853,31 +852,31 @@ function [accExcTrnz, accuracy, predicLabel, actualLabel, all_error] = hdcpredic
         sigHV=mode([sigHV1;sigHV2;sigHV3;sigHV4;sigHV5]);
         %% setup spatial encoder outputs for all channels for all modalities N-1 samples
         for sample_index = 2:1:N
-            v1 = computeNgramproj (testSet1 (i : i+N-1,:), CiM, N, precision, iM1, channels1,projM1_pos, projM1_neg, sample_index,D);
+            v1 = computeNgramproj (testSet1 (i : i+N-1,:), CiM1, N, precision, iM1, channels1,sample_index,D);
             if channels1==1
                 record1 = v1;          
             else
                 record1 = mode(v1); 
             end
-            v2 = computeNgramproj (testSet2 (i : i+N-1,:), CiM, N, precision, iM2, channels2,projM2_pos, projM2_neg, sample_index,D);
+            v2 = computeNgramproj (testSet2 (i : i+N-1,:), CiM2, N, precision, iM2, channels2,sample_index,D);
             if channels2==1
                 record2 = v2;          
             else
                 record2 = mode(v2); 
             end
-            v3 = computeNgramproj (testSet3 (i : i+N-1,:), CiM, N, precision, iM3, channels3,projM3_pos, projM3_neg, sample_index,D);
+            v3 = computeNgramproj (testSet3 (i : i+N-1,:), CiM3, N, precision, iM3, channels3,sample_index,D);
             if channels3==1
                 record3 = v3;          
             else
                 record3 = mode(v3); 
             end
-            v4 = computeNgramproj (testSet4 (i : i+N-1,:), CiM, N, precision, iM4, channels4,projM4_pos, projM4_neg, sample_index,D);
+            v4 = computeNgramproj (testSet4 (i : i+N-1,:), CiM4, N, precision, iM4, channels4,sample_index,D);
             if channels4==1
                 record4 = v4;          
             else
                 record4 = mode(v4); 
             end
-            v5 = computeNgramproj (testSet5 (i : i+N-1,:), CiM, N, precision, iM5, channels5,projM5_pos, projM5_neg, sample_index,D);
+            v5 = computeNgramproj (testSet5 (i : i+N-1,:), CiM5, N, precision, iM5, channels5, sample_index,D);
             if channels5==1
                 record5 = v5;          
             else
@@ -894,8 +893,8 @@ function [accExcTrnz, accuracy, predicLabel, actualLabel, all_error] = hdcpredic
    
 	    [predict_hamm, error, second_error] = hamming(sigHV, AM, classes);
         predicLabel(i : i+N-1) = predict_hamm;
-        all_error = [all_error error]; %#ok<AGROW>
-        second_error_all = [second_error_all second_error]; %#ok<AGROW>
+        %all_error = [all_error error]; %#ok<AGROW>
+        %second_error_all = [second_error_all second_error]; %#ok<AGROW>
         if predict_hamm == actualLabel(i)
 			correct = correct + 1;
         elseif labelTestSet1 (i) ~= labelTestSet1(i+N-1)

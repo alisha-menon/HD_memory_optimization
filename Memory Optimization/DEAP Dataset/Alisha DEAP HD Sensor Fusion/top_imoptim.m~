@@ -149,10 +149,6 @@ COMPLETE_1_l_RES=features_RES;
 D_full = [10000];
 randCounter= 10;
 acc_matrix = zeros(10);
-acc_matrix_A = zeros(10);
-acc_matrix_V = zeros(10);
-acc_matrix_D = zeros(10);
-acc_matrix_L = zeros(10);
 acc_matrix = [acc_matrix;acc_matrix;acc_matrix;acc_matrix];
 while (randCounter>0)
     rng('shuffle');
@@ -597,7 +593,6 @@ end
 accuracy(N,2) = acc2;
 acc2
 acc_matrix((randCounter*4),(D/1000)) = acc2;
-acc_matrix_L(randCounter,(D/1000)) = acc2;
 
 %acc_ngram_1(N,j)=acc1;
 acc_ngram_L(N,j)=acc2;
@@ -626,7 +621,6 @@ end
 accuracy(N,2) = acc2;
 acc2
 acc_matrix((randCounter*4 - 1),(D/1000)) = acc2;
-acc_matrix_D(randCounter,(D/1000)) = acc2;
 
 acc_ngram_D(N,j)=acc2;
 
@@ -654,7 +648,6 @@ end
 accuracy(N,2) = acc2;
 acc2
 acc_matrix((randCounter*4 - 2),(D/1000)) = acc2;
-acc_matrix_V(randCounter,(D/1000)) = acc2;
 
 acc_ngram_V(N,j)=acc2;
 
@@ -681,7 +674,6 @@ end
 accuracy(N,2) = acc2;
 acc2
 acc_matrix((randCounter*4 - 3),(D/1000)) = acc2;
-acc_matrix_A(randCounter,(D/1000)) = acc2;
 
 %acc_ngram_1(N,j)=acc1;
 acc_ngram_A(N,j)=acc2;

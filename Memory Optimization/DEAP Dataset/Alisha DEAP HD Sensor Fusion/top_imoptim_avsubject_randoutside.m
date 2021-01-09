@@ -577,12 +577,20 @@ mean_A = mean(acc_matrix_A,2);
 mean_V = mean(acc_matrix_V,2);
 mean_AV = (mean_A + mean_V)./2;
 [~,max_index] = max(mean_AV);
+%% key metrics
 acc_av_max_A = mean_A(max_index);
 acc_av_max_V = mean_V(max_index);
 acc_max_V = max(mean_V);
 acc_max_A = max(mean_A);
 acc_av_av_A = mean(mean_A);
 acc_av_av_V = mean(mean_V);
+aaaaccuracy_sprdsht = zeros(3,2);
+aaaaccuracy_sprdsht(1,1) = acc_av_av_A;
+aaaaccuracy_sprdsht(1,2) = acc_av_av_V;
+aaaaccuracy_sprdsht(2,1) = acc_max_A;
+aaaaccuracy_sprdsht(2,2) = acc_max_V;
+aaaaccuracy_sprdsht(3,1) = acc_av_max_A;
+aaaaccuracy_sprdsht(3,2) = acc_av_max_V;
 
 % ex accuracy
 % mean_A_ex = mean(acc_matrix_Aex,2);
@@ -608,3 +616,15 @@ aaacc_max_A_ex_all = max(mean_A_ex_all);
 %% plot this one
 aacc_av_av_A_ex_all = mean(mean_A_ex_all);
 aacc_av_av_V_ex_all = mean(mean_V_ex_all);
+
+aaaaccuracy_sprdsht_ex_all = zeros(3,2);
+aaaaccuracy_sprdsht_ex_all(1,1) = aacc_av_av_A_ex_all;
+aaaaccuracy_sprdsht_ex_all(1,2) = aacc_av_av_V_ex_all;
+aaaaccuracy_sprdsht_ex_all(2,1) = aaacc_max_A_ex_all;
+aaaaccuracy_sprdsht_ex_all(2,2) = aaacc_max_V_ex_all;
+aaaaccuracy_sprdsht_ex_all(3,1) = aaacc_av_max_A_ex_all;
+aaaaccuracy_sprdsht_ex_all(3,2) = aaacc_av_max_V_ex_all;
+
+%%also put into spreadsheet
+aaaaccuracy_matrix_data = acc_matrix;
+aaaaccuracy_matrix_data_ex_all = acc_matrix_ex_all;

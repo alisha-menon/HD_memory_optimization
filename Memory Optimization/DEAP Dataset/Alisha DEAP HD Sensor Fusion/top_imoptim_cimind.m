@@ -1,5 +1,5 @@
 clear;
-
+randCounter= 10;
 %====Features and Label===
 load('DEAP_data.mat')
 features=inputs;
@@ -8,7 +8,7 @@ f_label_v_binary=features(:,240);
 f_label_d_binary=features(:,241);
 f_label_l_binary=features(:,242);
 
-m = 4.5;
+m = 5;
 
 % f_label = f_label_a_binary;
 % f_label(f_label <= 3) = 1;
@@ -44,20 +44,23 @@ for k=1:238
  features(:,k)=features(:,k)/max(features(:,k));
 end
 
-for i=1:238
- features(:,i)=2*features(:,i)-1;
-end
-
-for i=1:238
- features(:,i)=features(:,i)+0.35;
-end
+% for i=1:238
+%  features(:,i)=2*features(:,i)-1;
+% end
+% 
+% for i=1:238
+%  features(:,i)=features(:,i)+0.35;
+% end
 
 features_EMG=features(:,1:10);
 features_EEG=features(:,11:202);
 features_GSR=features(:,203:209);
 features_BVP=features(:,210:226);
 features_RES=features(:,227:238);
-
+classifications = features(:,239:242);
+cutoff = (((max(max(features(:,239:242)))-min(min(features(:,239:242))))/2)+min(min(features(:,239:242))));
+classifications(classifications < cutoff) = 0;
+classifications(classifications >= cutoff) = 1;
 % features_EMG=features(f_label_ind,1:10);
 % features_EEG=features(f_label_ind,11:202);
 % features_GSR=features(f_label_ind,203:209);
@@ -86,7 +89,7 @@ features_RES=features(:,227:238);
 % select = 2 for late fusion
 select = 1;
 if (select == 1)
-    HD_functions_mod_reduced;     % load HD functions
+    HD_functions_mod_reduced_cimind;     % load HD functions
 else 
     HD_functions_multiplex;
 end
@@ -147,12 +150,16 @@ COMPLETE_1_l_RES=features_RES;
 
 % D_full = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]; %dimension of the hypervectors
 D_full = [10000];
-randCounter= 10;
 acc_matrix = zeros(10);
 acc_matrix_A = zeros(10);
 acc_matrix_V = zeros(10);
 acc_matrix_D = zeros(10);
 acc_matrix_L = zeros(10);
+acc_hamclass_L = zeros(10,1);
+acc_hamclass_D = zeros(10,1);
+acc_hamclass_A = zeros(10,1);
+acc_hamclass_V = zeros(10,1);
+
 acc_matrix = [acc_matrix;acc_matrix;acc_matrix;acc_matrix];
 while (randCounter>0)
     rng('shuffle');
@@ -162,16 +169,16 @@ learningFrac;
 D=D_full(j);
 D
 classes = 2; % level of classes
-precision = 20; %no use
+precision = 10;
 ngram = 3; % for temporal encode
-maxL = 2; % for IM gen
+maxL = 10; % for IM gen
 channels_v_EXG=channels_v+channels_v_EEG+channels_v_GSR+channels_v_BVP+channels_v_RES;
 channels_a_EXG=channels_a+channels_a_EEG+channels_a_GSR+channels_a_BVP+channels_a_RES;
 channels_d_EXG=channels_d+channels_d_EEG+channels_d_GSR+channels_d_BVP+channels_d_RES;
 channels_l_EXG=channels_l+channels_l_EEG+channels_l_GSR+channels_l_BVP+channels_l_RES;
 
 
-[chAM1, iMch1] = initItemMemories (D, maxL, channels_v);
+[chAM1, iMch1] = initItemMemories (D, maxL, channels_v); %emg
 [chAM3, iMch3] = initItemMemories (D, maxL, channels_v_EEG);
 [chAM5, iMch5] = initItemMemories (D, maxL, channels_v_GSR);
 [chAM7, iMch7] = initItemMemories (D, maxL, channels_v_BVP);
@@ -255,65 +262,65 @@ LABEL_1_l=f_label_l_binary;
 
 
 reduced_TS_COMPLETE_01 = TS_COMPLETE_01;
-reduced_TS_COMPLETE_01(reduced_TS_COMPLETE_01 > 0) = 1;
-reduced_TS_COMPLETE_01(reduced_TS_COMPLETE_01 < 0) = 2;
+% reduced_TS_COMPLETE_01(reduced_TS_COMPLETE_01 > 0) = 1;
+% reduced_TS_COMPLETE_01(reduced_TS_COMPLETE_01 < 0) = 2;
 reduced_TS_COMPLETE_02 = TS_COMPLETE_02;
-reduced_TS_COMPLETE_02(reduced_TS_COMPLETE_02 > 0) = 1;
-reduced_TS_COMPLETE_02(reduced_TS_COMPLETE_02 < 0) = 2;
+% reduced_TS_COMPLETE_02(reduced_TS_COMPLETE_02 > 0) = 1;
+% reduced_TS_COMPLETE_02(reduced_TS_COMPLETE_02 < 0) = 2;
 reduced_TS_COMPLETE_03 = TS_COMPLETE_03;
-reduced_TS_COMPLETE_03(reduced_TS_COMPLETE_03 > 0) = 1;
-reduced_TS_COMPLETE_03(reduced_TS_COMPLETE_03 < 0) = 2;
+% reduced_TS_COMPLETE_03(reduced_TS_COMPLETE_03 > 0) = 1;
+% reduced_TS_COMPLETE_03(reduced_TS_COMPLETE_03 < 0) = 2;
 reduced_TS_COMPLETE_04 = TS_COMPLETE_04;
-reduced_TS_COMPLETE_04(reduced_TS_COMPLETE_04 > 0) = 1;
-reduced_TS_COMPLETE_04(reduced_TS_COMPLETE_04 < 0) = 2;
+% reduced_TS_COMPLETE_04(reduced_TS_COMPLETE_04 > 0) = 1;
+% reduced_TS_COMPLETE_04(reduced_TS_COMPLETE_04 < 0) = 2;
 reduced_TS_COMPLETE_11 = TS_COMPLETE_11;
-reduced_TS_COMPLETE_11(reduced_TS_COMPLETE_11 > 0) = 1;
-reduced_TS_COMPLETE_11(reduced_TS_COMPLETE_11 < 0) = 2;
+% reduced_TS_COMPLETE_11(reduced_TS_COMPLETE_11 > 0) = 1;
+% reduced_TS_COMPLETE_11(reduced_TS_COMPLETE_11 < 0) = 2;
 reduced_TS_COMPLETE_12 = TS_COMPLETE_12;
-reduced_TS_COMPLETE_12(reduced_TS_COMPLETE_12 > 0) = 1;
-reduced_TS_COMPLETE_12(reduced_TS_COMPLETE_12 < 0) = 2;
+% reduced_TS_COMPLETE_12(reduced_TS_COMPLETE_12 > 0) = 1;
+% reduced_TS_COMPLETE_12(reduced_TS_COMPLETE_12 < 0) = 2;
 reduced_TS_COMPLETE_13 = TS_COMPLETE_13;
-reduced_TS_COMPLETE_13(reduced_TS_COMPLETE_13 > 0) = 1;
-reduced_TS_COMPLETE_13(reduced_TS_COMPLETE_13 < 0) = 2;
+% reduced_TS_COMPLETE_13(reduced_TS_COMPLETE_13 > 0) = 1;
+% reduced_TS_COMPLETE_13(reduced_TS_COMPLETE_13 < 0) = 2;
 reduced_TS_COMPLETE_14 = TS_COMPLETE_14;
-reduced_TS_COMPLETE_14(reduced_TS_COMPLETE_14 > 0) = 1;
-reduced_TS_COMPLETE_14(reduced_TS_COMPLETE_14 < 0) = 2;
+% reduced_TS_COMPLETE_14(reduced_TS_COMPLETE_14 > 0) = 1;
+% reduced_TS_COMPLETE_14(reduced_TS_COMPLETE_14 < 0) = 2;
 reduced_TS_COMPLETE_21 = TS_COMPLETE_21;
-reduced_TS_COMPLETE_21(reduced_TS_COMPLETE_21 > 0) = 1;
-reduced_TS_COMPLETE_21(reduced_TS_COMPLETE_21 < 0) = 2;
+% reduced_TS_COMPLETE_21(reduced_TS_COMPLETE_21 > 0) = 1;
+% reduced_TS_COMPLETE_21(reduced_TS_COMPLETE_21 < 0) = 2;
 reduced_TS_COMPLETE_22 = TS_COMPLETE_22;
-reduced_TS_COMPLETE_22(reduced_TS_COMPLETE_22 > 0) = 1;
-reduced_TS_COMPLETE_22(reduced_TS_COMPLETE_22 < 0) = 2;
+% reduced_TS_COMPLETE_22(reduced_TS_COMPLETE_22 > 0) = 1;
+% reduced_TS_COMPLETE_22(reduced_TS_COMPLETE_22 < 0) = 2;
 reduced_TS_COMPLETE_23 = TS_COMPLETE_23;
-reduced_TS_COMPLETE_23(reduced_TS_COMPLETE_23 > 0) = 1;
-reduced_TS_COMPLETE_23(reduced_TS_COMPLETE_23 < 0) = 2;
+% reduced_TS_COMPLETE_23(reduced_TS_COMPLETE_23 > 0) = 1;
+% reduced_TS_COMPLETE_23(reduced_TS_COMPLETE_23 < 0) = 2;
 reduced_TS_COMPLETE_24 = TS_COMPLETE_24;
-reduced_TS_COMPLETE_24(reduced_TS_COMPLETE_24 > 0) = 1;
-reduced_TS_COMPLETE_24(reduced_TS_COMPLETE_24 < 0) = 2;
+% reduced_TS_COMPLETE_24(reduced_TS_COMPLETE_24 > 0) = 1;
+% reduced_TS_COMPLETE_24(reduced_TS_COMPLETE_24 < 0) = 2;
 reduced_TS_COMPLETE_31 = TS_COMPLETE_31;
-reduced_TS_COMPLETE_31(reduced_TS_COMPLETE_31 > 0) = 1;
-reduced_TS_COMPLETE_31(reduced_TS_COMPLETE_31 < 0) = 2;
+% reduced_TS_COMPLETE_31(reduced_TS_COMPLETE_31 > 0) = 1;
+% reduced_TS_COMPLETE_31(reduced_TS_COMPLETE_31 < 0) = 2;
 reduced_TS_COMPLETE_32 = TS_COMPLETE_32;
-reduced_TS_COMPLETE_32(reduced_TS_COMPLETE_32 > 0) = 1;
-reduced_TS_COMPLETE_32(reduced_TS_COMPLETE_32 < 0) = 2;
+% reduced_TS_COMPLETE_32(reduced_TS_COMPLETE_32 > 0) = 1;
+% reduced_TS_COMPLETE_32(reduced_TS_COMPLETE_32 < 0) = 2;
 reduced_TS_COMPLETE_33 = TS_COMPLETE_33;
-reduced_TS_COMPLETE_33(reduced_TS_COMPLETE_33 > 0) = 1;
-reduced_TS_COMPLETE_33(reduced_TS_COMPLETE_33 < 0) = 2;
+% reduced_TS_COMPLETE_33(reduced_TS_COMPLETE_33 > 0) = 1;
+% reduced_TS_COMPLETE_33(reduced_TS_COMPLETE_33 < 0) = 2;
 reduced_TS_COMPLETE_34 = TS_COMPLETE_34;
-reduced_TS_COMPLETE_34(reduced_TS_COMPLETE_34 > 0) = 1;
-reduced_TS_COMPLETE_34(reduced_TS_COMPLETE_34 < 0) = 2;
+% reduced_TS_COMPLETE_34(reduced_TS_COMPLETE_34 > 0) = 1;
+% reduced_TS_COMPLETE_34(reduced_TS_COMPLETE_34 < 0) = 2;
 reduced_TS_COMPLETE_41 = TS_COMPLETE_41;
-reduced_TS_COMPLETE_41(reduced_TS_COMPLETE_41 > 0) = 1;
-reduced_TS_COMPLETE_41(reduced_TS_COMPLETE_41 < 0) = 2;
+% reduced_TS_COMPLETE_41(reduced_TS_COMPLETE_41 > 0) = 1;
+% reduced_TS_COMPLETE_41(reduced_TS_COMPLETE_41 < 0) = 2;
 reduced_TS_COMPLETE_42 = TS_COMPLETE_42;
-reduced_TS_COMPLETE_42(reduced_TS_COMPLETE_42 > 0) = 1;
-reduced_TS_COMPLETE_42(reduced_TS_COMPLETE_42 < 0) = 2;
+% reduced_TS_COMPLETE_42(reduced_TS_COMPLETE_42 > 0) = 1;
+% reduced_TS_COMPLETE_42(reduced_TS_COMPLETE_42 < 0) = 2;
 reduced_TS_COMPLETE_43 = TS_COMPLETE_43;
-reduced_TS_COMPLETE_43(reduced_TS_COMPLETE_43 > 0) = 1;
-reduced_TS_COMPLETE_43(reduced_TS_COMPLETE_43 < 0) = 2;
+% reduced_TS_COMPLETE_43(reduced_TS_COMPLETE_43 > 0) = 1;
+% reduced_TS_COMPLETE_43(reduced_TS_COMPLETE_43 < 0) = 2;
 reduced_TS_COMPLETE_44 = TS_COMPLETE_44;
-reduced_TS_COMPLETE_44(reduced_TS_COMPLETE_44 > 0) = 1;
-reduced_TS_COMPLETE_44(reduced_TS_COMPLETE_44 < 0) = 2;
+% reduced_TS_COMPLETE_44(reduced_TS_COMPLETE_44 > 0) = 1;
+% reduced_TS_COMPLETE_44(reduced_TS_COMPLETE_44 < 0) = 2;
 
 
 reduced_L_TS_COMPLETE_1 = L_TS_COMPLETE_01;
@@ -330,33 +337,33 @@ reduced_L_TS_COMPLETE_4(reduced_L_TS_COMPLETE_4 == 1) = 0;
 reduced_L_TS_COMPLETE_4(reduced_L_TS_COMPLETE_4 == 2) = 1;
 
 %Valence
-valence_count_class_change = 0;
-for i = 1:1:length(LABEL_1_v)-1
-    if LABEL_1_v(i) ~= LABEL_1_v(i+1)
-        valence_count_class_change = valence_count_class_change+1;
-    end
-end
-%arousal
-arousal_count_class_change = 0;
-for i = 1:1:length(LABEL_1_a)-1
-    if LABEL_1_a(i) ~= LABEL_1_a(i+1)
-        arousal_count_class_change = arousal_count_class_change+1;
-    end
-end
-
-dominance_count_class_change = 0;
-for i = 1:1:length(LABEL_1_d)-1
-    if LABEL_1_d(i) ~= LABEL_1_d(i+1)
-        dominance_count_class_change = dominance_count_class_change+1;
-    end
-end
-
-liking_count_class_change = 0;
-for i = 1:1:length(LABEL_1_l)-1
-    if LABEL_1_l(i) ~= LABEL_1_l(i+1)
-        liking_count_class_change = liking_count_class_change+1;
-    end
-end
+% valence_count_class_change = 0;
+% for i = 1:1:length(LABEL_1_v)-1
+%     if LABEL_1_v(i) ~= LABEL_1_v(i+1)
+%         valence_count_class_change = valence_count_class_change+1;
+%     end
+% end
+% %arousal
+% arousal_count_class_change = 0;
+% for i = 1:1:length(LABEL_1_a)-1
+%     if LABEL_1_a(i) ~= LABEL_1_a(i+1)
+%         arousal_count_class_change = arousal_count_class_change+1;
+%     end
+% end
+% 
+% dominance_count_class_change = 0;
+% for i = 1:1:length(LABEL_1_d)-1
+%     if LABEL_1_d(i) ~= LABEL_1_d(i+1)
+%         dominance_count_class_change = dominance_count_class_change+1;
+%     end
+% end
+% 
+% liking_count_class_change = 0;
+% for i = 1:1:length(LABEL_1_l)-1
+%     if LABEL_1_l(i) ~= LABEL_1_l(i+1)
+%         liking_count_class_change = liking_count_class_change+1;
+%     end
+% end
 %generate the training matrices using the learning rate contined in the
 %variable "learningFrac"
 % 1 = v + GSR
@@ -392,65 +399,65 @@ end
 [L_SAMPL_DATA_44, SAMPL_DATA_44] = genTrainData (TS_COMPLETE_44, L_TS_COMPLETE_44, learningFrac, 'inorder');
 
 reduced_SAMPL_DATA_01 = SAMPL_DATA_01;
-reduced_SAMPL_DATA_01(reduced_SAMPL_DATA_01 > 0) = 1;
-reduced_SAMPL_DATA_01(reduced_SAMPL_DATA_01 < 0) = 2;
+% reduced_SAMPL_DATA_01(reduced_SAMPL_DATA_01 > 0) = 1;
+% reduced_SAMPL_DATA_01(reduced_SAMPL_DATA_01 < 0) = 2;
 reduced_SAMPL_DATA_02 = SAMPL_DATA_02;
-reduced_SAMPL_DATA_02(reduced_SAMPL_DATA_02 > 0) = 1;
-reduced_SAMPL_DATA_02(reduced_SAMPL_DATA_02 < 0) = 2;
+% reduced_SAMPL_DATA_02(reduced_SAMPL_DATA_02 > 0) = 1;
+% reduced_SAMPL_DATA_02(reduced_SAMPL_DATA_02 < 0) = 2;
 reduced_SAMPL_DATA_03 = SAMPL_DATA_03;
-reduced_SAMPL_DATA_03(reduced_SAMPL_DATA_03 > 0) = 1;
-reduced_SAMPL_DATA_03(reduced_SAMPL_DATA_03 < 0) = 2;
+% reduced_SAMPL_DATA_03(reduced_SAMPL_DATA_03 > 0) = 1;
+% reduced_SAMPL_DATA_03(reduced_SAMPL_DATA_03 < 0) = 2;
 reduced_SAMPL_DATA_04 = SAMPL_DATA_04;
-reduced_SAMPL_DATA_04(reduced_SAMPL_DATA_04 > 0) = 1;
-reduced_SAMPL_DATA_04(reduced_SAMPL_DATA_04 < 0) = 2;
+% reduced_SAMPL_DATA_04(reduced_SAMPL_DATA_04 > 0) = 1;
+% reduced_SAMPL_DATA_04(reduced_SAMPL_DATA_04 < 0) = 2;
 reduced_SAMPL_DATA_11 = SAMPL_DATA_11;
-reduced_SAMPL_DATA_11(reduced_SAMPL_DATA_11 > 0) = 1;
-reduced_SAMPL_DATA_11(reduced_SAMPL_DATA_11 < 0) = 2;
+% reduced_SAMPL_DATA_11(reduced_SAMPL_DATA_11 > 0) = 1;
+% reduced_SAMPL_DATA_11(reduced_SAMPL_DATA_11 < 0) = 2;
 reduced_SAMPL_DATA_12 = SAMPL_DATA_12;
-reduced_SAMPL_DATA_12(reduced_SAMPL_DATA_12 > 0) = 1;
-reduced_SAMPL_DATA_12(reduced_SAMPL_DATA_12 < 0) = 2;
+% reduced_SAMPL_DATA_12(reduced_SAMPL_DATA_12 > 0) = 1;
+% reduced_SAMPL_DATA_12(reduced_SAMPL_DATA_12 < 0) = 2;
 reduced_SAMPL_DATA_13 = SAMPL_DATA_13;
-reduced_SAMPL_DATA_13(reduced_SAMPL_DATA_13 > 0) = 1;
-reduced_SAMPL_DATA_13(reduced_SAMPL_DATA_13 < 0) = 2;
+% reduced_SAMPL_DATA_13(reduced_SAMPL_DATA_13 > 0) = 1;
+% reduced_SAMPL_DATA_13(reduced_SAMPL_DATA_13 < 0) = 2;
 reduced_SAMPL_DATA_14 = SAMPL_DATA_14;
-reduced_SAMPL_DATA_14(reduced_SAMPL_DATA_14 > 0) = 1;
-reduced_SAMPL_DATA_14(reduced_SAMPL_DATA_14 < 0) = 2;
+% reduced_SAMPL_DATA_14(reduced_SAMPL_DATA_14 > 0) = 1;
+% reduced_SAMPL_DATA_14(reduced_SAMPL_DATA_14 < 0) = 2;
 reduced_SAMPL_DATA_21 = SAMPL_DATA_21;
-reduced_SAMPL_DATA_21(reduced_SAMPL_DATA_21 > 0) = 1;
-reduced_SAMPL_DATA_21(reduced_SAMPL_DATA_21 < 0) = 2;
+% reduced_SAMPL_DATA_21(reduced_SAMPL_DATA_21 > 0) = 1;
+% reduced_SAMPL_DATA_21(reduced_SAMPL_DATA_21 < 0) = 2;
 reduced_SAMPL_DATA_22 = SAMPL_DATA_22;
-reduced_SAMPL_DATA_22(reduced_SAMPL_DATA_22 > 0) = 1;
-reduced_SAMPL_DATA_22(reduced_SAMPL_DATA_22 < 0) = 2;
+% reduced_SAMPL_DATA_22(reduced_SAMPL_DATA_22 > 0) = 1;
+% reduced_SAMPL_DATA_22(reduced_SAMPL_DATA_22 < 0) = 2;
 reduced_SAMPL_DATA_23 = SAMPL_DATA_23;
-reduced_SAMPL_DATA_23(reduced_SAMPL_DATA_23 > 0) = 1;
-reduced_SAMPL_DATA_23(reduced_SAMPL_DATA_23 < 0) = 2;
+% reduced_SAMPL_DATA_23(reduced_SAMPL_DATA_23 > 0) = 1;
+% reduced_SAMPL_DATA_23(reduced_SAMPL_DATA_23 < 0) = 2;
 reduced_SAMPL_DATA_24 = SAMPL_DATA_24;
-reduced_SAMPL_DATA_24(reduced_SAMPL_DATA_24 > 0) = 1;
-reduced_SAMPL_DATA_24(reduced_SAMPL_DATA_24 < 0) = 2;
+% reduced_SAMPL_DATA_24(reduced_SAMPL_DATA_24 > 0) = 1;
+% reduced_SAMPL_DATA_24(reduced_SAMPL_DATA_24 < 0) = 2;
 reduced_SAMPL_DATA_31 = SAMPL_DATA_31;
-reduced_SAMPL_DATA_31(reduced_SAMPL_DATA_31 > 0) = 1;
-reduced_SAMPL_DATA_31(reduced_SAMPL_DATA_31 < 0) = 2;
+% reduced_SAMPL_DATA_31(reduced_SAMPL_DATA_31 > 0) = 1;
+% reduced_SAMPL_DATA_31(reduced_SAMPL_DATA_31 < 0) = 2;
 reduced_SAMPL_DATA_32 = SAMPL_DATA_32;
-reduced_SAMPL_DATA_32(reduced_SAMPL_DATA_32 > 0) = 1;
-reduced_SAMPL_DATA_32(reduced_SAMPL_DATA_32 < 0) = 2;
+% reduced_SAMPL_DATA_32(reduced_SAMPL_DATA_32 > 0) = 1;
+% reduced_SAMPL_DATA_32(reduced_SAMPL_DATA_32 < 0) = 2;
 reduced_SAMPL_DATA_33 = SAMPL_DATA_33;
-reduced_SAMPL_DATA_33(reduced_SAMPL_DATA_33 > 0) = 1;
-reduced_SAMPL_DATA_33(reduced_SAMPL_DATA_33 < 0) = 2;
+% reduced_SAMPL_DATA_33(reduced_SAMPL_DATA_33 > 0) = 1;
+% reduced_SAMPL_DATA_33(reduced_SAMPL_DATA_33 < 0) = 2;
 reduced_SAMPL_DATA_34 = SAMPL_DATA_34;
-reduced_SAMPL_DATA_34(reduced_SAMPL_DATA_34 > 0) = 1;
-reduced_SAMPL_DATA_34(reduced_SAMPL_DATA_34 < 0) = 2;
+% reduced_SAMPL_DATA_34(reduced_SAMPL_DATA_34 > 0) = 1;
+% reduced_SAMPL_DATA_34(reduced_SAMPL_DATA_34 < 0) = 2;
 reduced_SAMPL_DATA_41 = SAMPL_DATA_41;
-reduced_SAMPL_DATA_41(reduced_SAMPL_DATA_41 > 0) = 1;
-reduced_SAMPL_DATA_41(reduced_SAMPL_DATA_41 < 0) = 2;
+% reduced_SAMPL_DATA_41(reduced_SAMPL_DATA_41 > 0) = 1;
+% reduced_SAMPL_DATA_41(reduced_SAMPL_DATA_41 < 0) = 2;
 reduced_SAMPL_DATA_42 = SAMPL_DATA_42;
-reduced_SAMPL_DATA_42(reduced_SAMPL_DATA_42 > 0) = 1;
-reduced_SAMPL_DATA_42(reduced_SAMPL_DATA_42 < 0) = 2;
+% reduced_SAMPL_DATA_42(reduced_SAMPL_DATA_42 > 0) = 1;
+% reduced_SAMPL_DATA_42(reduced_SAMPL_DATA_42 < 0) = 2;
 reduced_SAMPL_DATA_43 = SAMPL_DATA_43;
-reduced_SAMPL_DATA_43(reduced_SAMPL_DATA_43 > 0) = 1;
-reduced_SAMPL_DATA_43(reduced_SAMPL_DATA_43 < 0) = 2;
+% reduced_SAMPL_DATA_43(reduced_SAMPL_DATA_43 > 0) = 1;
+% reduced_SAMPL_DATA_43(reduced_SAMPL_DATA_43 < 0) = 2;
 reduced_SAMPL_DATA_44 = SAMPL_DATA_44;
-reduced_SAMPL_DATA_44(reduced_SAMPL_DATA_44 > 0) = 1;
-reduced_SAMPL_DATA_44(reduced_SAMPL_DATA_44 < 0) = 2;
+% reduced_SAMPL_DATA_44(reduced_SAMPL_DATA_44 > 0) = 1;
+% reduced_SAMPL_DATA_44(reduced_SAMPL_DATA_44 < 0) = 2;
 
 reduced_L_SAMPL_DATA_1 = L_SAMPL_DATA_01 - 1;
 reduced_L_SAMPL_DATA_2 = L_SAMPL_DATA_02 - 1;
@@ -535,37 +542,37 @@ q=0.7;
 %     projM9_neg(i,:) = projM3_neg(i,:);
 % end
 
-projM1=projBRandomHV(D,channels_v,q);
-projM3=projBRandomHV(D,channels_v_EEG,q);
-projM5=projBRandomHV(D,channels_v_GSR,q);
-projM7=projBRandomHV(D,channels_v_BVP,q);
-projM9=projBRandomHV(D,channels_v_RES,q);
-
-projM1_neg = projM1;
-projM1_pos = projM1;
-projM1_neg(projM1_neg==-1) = 0;
-projM1_pos(projM1_pos==1) = 0;
-projM1_pos(projM1==-1) = 1;
-projM3_neg = projM3;
-projM3_pos = projM3;
-projM3_neg(projM3==-1) = 0;
-projM3_pos(projM3==1) = 0;
-projM3_pos(projM3==-1) = 1;
-projM5_neg = projM5;
-projM5_pos = projM5;
-projM5_neg(projM5==-1) = 0;
-projM5_pos(projM5==1) = 0;
-projM5_pos(projM5==-1) = 1;
-projM7_neg = projM7;
-projM7_pos = projM7;
-projM7_neg(projM7==-1) = 0;
-projM7_pos(projM7==1) = 0;
-projM7_pos(projM7==-1) = 1;
-projM9_neg = projM9;
-projM9_pos = projM9;
-projM9_neg(projM9==-1) = 0;
-projM9_pos(projM9==1) = 0;
-projM9_pos(projM9==-1) = 1;
+% projM1=projBRandomHV(D,channels_v,q);
+% projM3=projBRandomHV(D,channels_v_EEG,q);
+% projM5=projBRandomHV(D,channels_v_GSR,q);
+% projM7=projBRandomHV(D,channels_v_BVP,q);
+% projM9=projBRandomHV(D,channels_v_RES,q);
+% 
+% projM1_neg = projM1;
+% projM1_pos = projM1;
+% projM1_neg(projM1_neg==-1) = 0;
+% projM1_pos(projM1_pos==1) = 0;
+% projM1_pos(projM1==-1) = 1;
+% projM3_neg = projM3;
+% projM3_pos = projM3;
+% projM3_neg(projM3==-1) = 0;
+% projM3_pos(projM3==1) = 0;
+% projM3_pos(projM3==-1) = 1;
+% projM5_neg = projM5;
+% projM5_pos = projM5;
+% projM5_neg(projM5==-1) = 0;
+% projM5_pos(projM5==1) = 0;
+% projM5_pos(projM5==-1) = 1;
+% projM7_neg = projM7;
+% projM7_pos = projM7;
+% projM7_neg(projM7==-1) = 0;
+% projM7_pos(projM7==1) = 0;
+% projM7_pos(projM7==-1) = 1;
+% projM9_neg = projM9;
+% projM9_pos = projM9;
+% projM9_neg(projM9==-1) = 0;
+% projM9_pos(projM9==1) = 0;
+% projM9_pos(projM9==-1) = 1;
 
 
 for N = 3:ngram
@@ -577,7 +584,7 @@ N
 
 fprintf ('HDC for L\n');
 if (select == 1)
-    [numpat, hdc_model_2] = hdctrainproj (classes, reduced_L_SAMPL_DATA_4, reduced_L_SAMPL_DATA_4, reduced_L_SAMPL_DATA_4, reduced_L_SAMPL_DATA_4, reduced_L_SAMPL_DATA_4,reduced_SAMPL_DATA_04, reduced_SAMPL_DATA_14, reduced_SAMPL_DATA_24, reduced_SAMPL_DATA_34, reduced_SAMPL_DATA_44, chAM8, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, channels_l, channels_l_EEG, channels_l_GSR, channels_l_BVP, channels_l_RES, projM1_pos, projM1_neg, projM3_pos, projM3_neg, projM5_pos, projM5_neg, projM7_pos, projM7_neg, projM9_pos, projM9_neg);
+    [numpat, hdc_model_2] = hdctrainproj (classes, reduced_L_SAMPL_DATA_4, reduced_SAMPL_DATA_04, reduced_SAMPL_DATA_14, reduced_SAMPL_DATA_24, reduced_SAMPL_DATA_34, reduced_SAMPL_DATA_44, chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, channels_l, channels_l_EEG, channels_l_GSR, channels_l_BVP, channels_l_RES);
 else
     [numpat_2, hdc_model_2] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_2, chAM8, iMch1, D, N, precision, channels_a,projM1_pos,projM1_neg, classes); 
     [numpat_4, hdc_model_4] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_4, chAM8, iMch3, D, N, precision, channels_a_ECG,projM3_pos,projM3_neg, classes); 
@@ -592,12 +599,13 @@ if (select ~= 1)
     hdc_model_2(1)=mode([hdc_model_2(1); hdc_model_4(1); hdc_model_6(1)]);
 end
 
-[acc_ex2, acc2, pl2, al2, all_error] = hdcpredictproj  (reduced_L_TS_COMPLETE_4, reduced_TS_COMPLETE_04, reduced_L_TS_COMPLETE_4, reduced_TS_COMPLETE_14, reduced_L_TS_COMPLETE_4, reduced_TS_COMPLETE_24, reduced_L_TS_COMPLETE_4, reduced_TS_COMPLETE_34, reduced_L_TS_COMPLETE_4, reduced_TS_COMPLETE_44, hdc_model_2, chAM8, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, classes, channels_l, channels_l_EEG, channels_l_GSR, channels_l_BVP, channels_l_RES, projM1_pos, projM1_neg, projM3_pos, projM3_neg, projM5_pos, projM5_neg, projM7_pos, projM7_neg, projM9_pos, projM9_neg);
+[acc_ex2, acc2, pl2, al2, all_error] = hdcpredictproj  (reduced_L_TS_COMPLETE_4, reduced_TS_COMPLETE_04, reduced_TS_COMPLETE_14, reduced_TS_COMPLETE_24, reduced_TS_COMPLETE_34, reduced_TS_COMPLETE_44, hdc_model_2, chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, classes, channels_l, channels_l_EEG, channels_l_GSR, channels_l_BVP, channels_l_RES);
 
 accuracy(N,2) = acc2;
 acc2
-acc_matrix((randCounter*4),(D/1000)) = acc2;
-acc_matrix_L(randCounter,(D/1000)) = acc2;
+acc_matrix((randCounter*4),(D/1000)) = acc2*100;
+acc_matrix_L(randCounter,(D/1000)) = acc2*100;
+acc_hamclass_L(randCounter,1) = sum(xor(hdc_model_2(0),hdc_model_2(1)));
 
 %acc_ngram_1(N,j)=acc1;
 acc_ngram_L(N,j)=acc2;
@@ -606,7 +614,7 @@ acc_ngram_L(N,j)=acc2;
 
 fprintf ('HDC for D\n');
 if (select == 1)
-    [numpat, hdc_model_2] = hdctrainproj (classes, reduced_L_SAMPL_DATA_3, reduced_L_SAMPL_DATA_3, reduced_L_SAMPL_DATA_3, reduced_L_SAMPL_DATA_3, reduced_L_SAMPL_DATA_3,reduced_SAMPL_DATA_03, reduced_SAMPL_DATA_13, reduced_SAMPL_DATA_23, reduced_SAMPL_DATA_33, reduced_SAMPL_DATA_43, chAM8, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, channels_d, channels_d_EEG, channels_d_GSR, channels_d_BVP, channels_d_RES, projM1_pos, projM1_neg, projM3_pos, projM3_neg, projM5_pos, projM5_neg, projM7_pos, projM7_neg, projM9_pos, projM9_neg);
+    [numpat, hdc_model_2] = hdctrainproj (classes, reduced_L_SAMPL_DATA_3,reduced_SAMPL_DATA_03, reduced_SAMPL_DATA_13, reduced_SAMPL_DATA_23, reduced_SAMPL_DATA_33, reduced_SAMPL_DATA_43,chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, channels_l, channels_l_EEG, channels_l_GSR, channels_l_BVP, channels_l_RES);
 else
     [numpat_2, hdc_model_2] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_2, chAM8, iMch1, D, N, precision, channels_a,projM1_pos,projM1_neg, classes); 
     [numpat_4, hdc_model_4] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_4, chAM8, iMch3, D, N, precision, channels_a_ECG,projM3_pos,projM3_neg, classes); 
@@ -621,12 +629,13 @@ if (select ~= 1)
     hdc_model_2(1)=mode([hdc_model_2(1); hdc_model_4(1); hdc_model_6(1)]);
 end
 
-[acc_ex2, acc2, pl2, al2, all_error] = hdcpredictproj  (reduced_L_TS_COMPLETE_3, reduced_TS_COMPLETE_03, reduced_L_TS_COMPLETE_3, reduced_TS_COMPLETE_13, reduced_L_TS_COMPLETE_3, reduced_TS_COMPLETE_23, reduced_L_TS_COMPLETE_3, reduced_TS_COMPLETE_33, reduced_L_TS_COMPLETE_3, reduced_TS_COMPLETE_43, hdc_model_2, chAM8, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, classes, channels_d, channels_d_EEG, channels_d_GSR, channels_d_BVP, channels_d_RES, projM1_pos, projM1_neg, projM3_pos, projM3_neg, projM5_pos, projM5_neg, projM7_pos, projM7_neg, projM9_pos, projM9_neg);
+[acc_ex2, acc2, pl2, al2, all_error] = hdcpredictproj  (reduced_L_TS_COMPLETE_3, reduced_TS_COMPLETE_03, reduced_TS_COMPLETE_13, reduced_TS_COMPLETE_23, reduced_TS_COMPLETE_33, reduced_TS_COMPLETE_43, hdc_model_2, chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, classes, channels_d, channels_d_EEG, channels_d_GSR, channels_d_BVP, channels_d_RES);
 
 accuracy(N,2) = acc2;
 acc2
-acc_matrix((randCounter*4 - 1),(D/1000)) = acc2;
-acc_matrix_D(randCounter,(D/1000)) = acc2;
+acc_matrix((randCounter*4 - 1),(D/1000)) = acc2*100;
+acc_matrix_D(randCounter,(D/1000)) = acc2*100;
+acc_hamclass_D(randCounter,1) = sum(xor(hdc_model_2(0),hdc_model_2(1)));
 
 acc_ngram_D(N,j)=acc2;
 
@@ -634,7 +643,7 @@ acc_ngram_D(N,j)=acc2;
 
 fprintf ('HDC for V\n');
 if (select == 1)
-    [numpat, hdc_model_2] = hdctrainproj (classes, reduced_L_SAMPL_DATA_2, reduced_L_SAMPL_DATA_2, reduced_L_SAMPL_DATA_2, reduced_L_SAMPL_DATA_2, reduced_L_SAMPL_DATA_2,reduced_SAMPL_DATA_02, reduced_SAMPL_DATA_12, reduced_SAMPL_DATA_22, reduced_SAMPL_DATA_32, reduced_SAMPL_DATA_42, chAM8, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, projM1_pos, projM1_neg, projM3_pos, projM3_neg, projM5_pos, projM5_neg, projM7_pos, projM7_neg, projM9_pos, projM9_neg);
+    [numpat, hdc_model_2] = hdctrainproj (classes, reduced_L_SAMPL_DATA_2,reduced_SAMPL_DATA_02, reduced_SAMPL_DATA_12, reduced_SAMPL_DATA_22, reduced_SAMPL_DATA_32, reduced_SAMPL_DATA_42,chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, channels_l, channels_l_EEG, channels_l_GSR, channels_l_BVP, channels_l_RES);
 else
     [numpat_2, hdc_model_2] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_2, chAM8, iMch1, D, N, precision, channels_a,projM1_pos,projM1_neg, classes); 
     [numpat_4, hdc_model_4] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_4, chAM8, iMch3, D, N, precision, channels_a_ECG,projM3_pos,projM3_neg, classes); 
@@ -649,19 +658,20 @@ if (select ~= 1)
     hdc_model_2(1)=mode([hdc_model_2(1); hdc_model_4(1); hdc_model_6(1)]);
 end
 
-[acc_ex2, acc2, pl2, al2, all_error] = hdcpredictproj  (reduced_L_TS_COMPLETE_2, reduced_TS_COMPLETE_02, reduced_L_TS_COMPLETE_2, reduced_TS_COMPLETE_12, reduced_L_TS_COMPLETE_2, reduced_TS_COMPLETE_22, reduced_L_TS_COMPLETE_2, reduced_TS_COMPLETE_32, reduced_L_TS_COMPLETE_2, reduced_TS_COMPLETE_42, hdc_model_2, chAM8, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, classes, channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, projM1_pos, projM1_neg, projM3_pos, projM3_neg, projM5_pos, projM5_neg, projM7_pos, projM7_neg, projM9_pos, projM9_neg);
+[acc_ex2, acc2, pl2, al2, all_error] = hdcpredictproj  (reduced_L_TS_COMPLETE_2, reduced_TS_COMPLETE_02, reduced_TS_COMPLETE_12, reduced_TS_COMPLETE_22, reduced_TS_COMPLETE_32, reduced_TS_COMPLETE_42, hdc_model_2, chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, classes, channels_d, channels_d_EEG, channels_d_GSR, channels_d_BVP, channels_d_RES);
 
 accuracy(N,2) = acc2;
 acc2
-acc_matrix((randCounter*4 - 2),(D/1000)) = acc2;
-acc_matrix_V(randCounter,(D/1000)) = acc2;
+acc_matrix((randCounter*4 - 2),(D/1000)) = acc2*100;
+acc_matrix_V(randCounter,(D/1000)) = acc2*100;
+acc_hamclass_V(randCounter,1) = sum(xor(hdc_model_2(0),hdc_model_2(1)));
 
 acc_ngram_V(N,j)=acc2;
 
 %% A
 fprintf ('HDC for A\n');
 if (select == 1)
-    [numpat, hdc_model_2] = hdctrainproj (classes, reduced_L_SAMPL_DATA_1, reduced_L_SAMPL_DATA_1, reduced_L_SAMPL_DATA_1, reduced_L_SAMPL_DATA_1, reduced_L_SAMPL_DATA_1,reduced_SAMPL_DATA_01, reduced_SAMPL_DATA_11, reduced_SAMPL_DATA_21, reduced_SAMPL_DATA_31, reduced_SAMPL_DATA_41, chAM8, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, channels_a, channels_a_EEG, channels_a_GSR, channels_a_BVP, channels_a_RES, projM1_pos, projM1_neg, projM3_pos, projM3_neg, projM5_pos, projM5_neg, projM7_pos, projM7_neg, projM9_pos, projM9_neg);
+    [numpat, hdc_model_2] = hdctrainproj (classes, reduced_L_SAMPL_DATA_1,reduced_SAMPL_DATA_01, reduced_SAMPL_DATA_11, reduced_SAMPL_DATA_21, reduced_SAMPL_DATA_31, reduced_SAMPL_DATA_41,chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, channels_l, channels_l_EEG, channels_l_GSR, channels_l_BVP, channels_l_RES);
 else
     [numpat_2, hdc_model_2] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_2, chAM8, iMch1, D, N, precision, channels_a,projM1_pos,projM1_neg, classes); 
     [numpat_4, hdc_model_4] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_4, chAM8, iMch3, D, N, precision, channels_a_ECG,projM3_pos,projM3_neg, classes); 
@@ -676,12 +686,13 @@ if (select ~= 1)
     hdc_model_2(1)=mode([hdc_model_2(1); hdc_model_4(1); hdc_model_6(1)]);
 end
 
-[acc_ex2, acc2, pl2, al2, all_error] = hdcpredictproj  (reduced_L_TS_COMPLETE_1, reduced_TS_COMPLETE_01, reduced_L_TS_COMPLETE_1, reduced_TS_COMPLETE_11, reduced_L_TS_COMPLETE_1, reduced_TS_COMPLETE_21, reduced_L_TS_COMPLETE_1, reduced_TS_COMPLETE_31, reduced_L_TS_COMPLETE_1, reduced_TS_COMPLETE_41, hdc_model_2, chAM8, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, classes, channels_a, channels_a_EEG, channels_a_GSR, channels_a_BVP, channels_a_RES, projM1_pos, projM1_neg, projM3_pos, projM3_neg, projM5_pos, projM5_neg, projM7_pos, projM7_neg, projM9_pos, projM9_neg);
+[acc_ex2, acc2, pl2, al2, all_error] = hdcpredictproj  (reduced_L_TS_COMPLETE_1, reduced_TS_COMPLETE_01, reduced_TS_COMPLETE_11, reduced_TS_COMPLETE_21, reduced_TS_COMPLETE_31, reduced_TS_COMPLETE_41, hdc_model_2, chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, classes, channels_d, channels_d_EEG, channels_d_GSR, channels_d_BVP, channels_d_RES);
 
 accuracy(N,2) = acc2;
 acc2
-acc_matrix((randCounter*4 - 3),(D/1000)) = acc2;
-acc_matrix_A(randCounter,(D/1000)) = acc2;
+acc_matrix((randCounter*4 - 3),(D/1000)) = acc2*100;
+acc_matrix_A(randCounter,(D/1000)) = acc2*100;
+acc_hamclass_A(randCounter,1) = sum(xor(hdc_model_2(0),hdc_model_2(1)));
 
 %acc_ngram_1(N,j)=acc1;
 acc_ngram_A(N,j)=acc2;

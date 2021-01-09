@@ -1,6 +1,5 @@
 clear;
-randCounter= 1;
-downSampRate = 8;
+randCounter= 10;
 %====Features and Label===
 load('DEAP_data.mat')
 features=inputs;
@@ -90,7 +89,7 @@ classifications(classifications >= cutoff) = 1;
 % select = 2 for late fusion
 select = 1;
 if (select == 1)
-    HD_functions_mod_reduced_cim;     % load HD functions
+    HD_functions_mod_reduced_cimindrand;     % load HD functions
 else 
     HD_functions_multiplex;
 end
@@ -164,7 +163,6 @@ acc_hamclass_V = zeros(10,1);
 acc_matrix = [acc_matrix;acc_matrix;acc_matrix;acc_matrix];
 while (randCounter>0)
     rng('shuffle');
-    randCounter
 for j=1:length(D_full)
 learningFrac = learningrate(1); 
 learningFrac;
@@ -231,6 +229,7 @@ channels_l_EXG=channels_l+channels_l_EEG+channels_l_GSR+channels_l_BVP+channels_
 
 %downsample the dataset using the value contained in the variable "downSampRate"
 %returns downsampled data which skips every 8 of the original dataset
+downSampRate = 8;
 LABEL_1_v=f_label_v_binary;
 LABEL_1_a=f_label_a_binary;
 LABEL_1_d=f_label_d_binary;
@@ -378,8 +377,8 @@ reduced_L_TS_COMPLETE_4(reduced_L_TS_COMPLETE_4 == 2) = 1;
 % to training data. Then it creates a dataset with labels corresponding to
 % the selected data for training. The label dataset is in order from 1-7
 % and the data is also stacked one by one so that it is in order from 1-7
-[L_SAMPL_DATA_01, SAMPL_DATA_01] = genTrainData (TS_COMPLETE_01, L_TS_COMPLETE_01, learningFrac, 'inorder'); %arousal
-[L_SAMPL_DATA_02, SAMPL_DATA_02] = genTrainData (TS_COMPLETE_02, L_TS_COMPLETE_02, learningFrac, 'inorder'); %valence
+[L_SAMPL_DATA_01, SAMPL_DATA_01] = genTrainData (TS_COMPLETE_01, L_TS_COMPLETE_01, learningFrac, 'inorder');
+[L_SAMPL_DATA_02, SAMPL_DATA_02] = genTrainData (TS_COMPLETE_02, L_TS_COMPLETE_02, learningFrac, 'inorder');
 [L_SAMPL_DATA_03, SAMPL_DATA_03] = genTrainData (TS_COMPLETE_03, L_TS_COMPLETE_03, learningFrac, 'inorder');
 [L_SAMPL_DATA_04, SAMPL_DATA_04] = genTrainData (TS_COMPLETE_04, L_TS_COMPLETE_04, learningFrac, 'inorder');
 [L_SAMPL_DATA_11, SAMPL_DATA_11] = genTrainData (TS_COMPLETE_11, L_TS_COMPLETE_11, learningFrac, 'inorder');
@@ -582,63 +581,63 @@ N
 
 %% L
 % generate ngram bundles for each data stream
-% 
-% fprintf ('HDC for L\n');
-% if (select == 1)
-%     [numpat, hdc_model_2] = hdctrainproj (classes, reduced_L_SAMPL_DATA_4, reduced_SAMPL_DATA_04, reduced_SAMPL_DATA_14, reduced_SAMPL_DATA_24, reduced_SAMPL_DATA_34, reduced_SAMPL_DATA_44, chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, channels_l, channels_l_EEG, channels_l_GSR, channels_l_BVP, channels_l_RES);
-% else
-%     [numpat_2, hdc_model_2] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_2, chAM8, iMch1, D, N, precision, channels_a,projM1_pos,projM1_neg, classes); 
-%     [numpat_4, hdc_model_4] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_4, chAM8, iMch3, D, N, precision, channels_a_ECG,projM3_pos,projM3_neg, classes); 
-%     [numpat_6, hdc_model_6] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_6, chAM8, iMch5, D, N, precision, channels_a_EEG,projM5_pos,projM5_neg, classes); 
-% end
-% 
-% %bundle all the sensors (this is the fusion point)
-% if (select ~= 1)
-%     %class 1
-%     hdc_model_2(0)=mode([hdc_model_2(0); hdc_model_4(0); hdc_model_6(0)]);
-%     %class 2
-%     hdc_model_2(1)=mode([hdc_model_2(1); hdc_model_4(1); hdc_model_6(1)]);
-% end
-% 
-% [acc_ex2, acc2, pl2, al2, all_error] = hdcpredictproj  (reduced_L_TS_COMPLETE_4, reduced_TS_COMPLETE_04, reduced_TS_COMPLETE_14, reduced_TS_COMPLETE_24, reduced_TS_COMPLETE_34, reduced_TS_COMPLETE_44, hdc_model_2, chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, classes, channels_l, channels_l_EEG, channels_l_GSR, channels_l_BVP, channels_l_RES);
-% 
-% accuracy(N,2) = acc2;
-% acc2
-% acc_matrix((randCounter*4),(D/1000)) = acc2*100;
-% acc_matrix_L(randCounter,(D/1000)) = acc2*100;
-% acc_hamclass_L(randCounter,1) = sum(xor(hdc_model_2(0),hdc_model_2(1)));
-% 
-% %acc_ngram_1(N,j)=acc1;
-% acc_ngram_L(N,j)=acc2;
+
+fprintf ('HDC for L\n');
+if (select == 1)
+    [numpat, hdc_model_2] = hdctrainproj (classes, reduced_L_SAMPL_DATA_4, reduced_SAMPL_DATA_04, reduced_SAMPL_DATA_14, reduced_SAMPL_DATA_24, reduced_SAMPL_DATA_34, reduced_SAMPL_DATA_44, chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, channels_l, channels_l_EEG, channels_l_GSR, channels_l_BVP, channels_l_RES);
+else
+    [numpat_2, hdc_model_2] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_2, chAM8, iMch1, D, N, precision, channels_a,projM1_pos,projM1_neg, classes); 
+    [numpat_4, hdc_model_4] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_4, chAM8, iMch3, D, N, precision, channels_a_ECG,projM3_pos,projM3_neg, classes); 
+    [numpat_6, hdc_model_6] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_6, chAM8, iMch5, D, N, precision, channels_a_EEG,projM5_pos,projM5_neg, classes); 
+end
+
+%bundle all the sensors (this is the fusion point)
+if (select ~= 1)
+    %class 1
+    hdc_model_2(0)=mode([hdc_model_2(0); hdc_model_4(0); hdc_model_6(0)]);
+    %class 2
+    hdc_model_2(1)=mode([hdc_model_2(1); hdc_model_4(1); hdc_model_6(1)]);
+end
+
+[acc_ex2, acc2, pl2, al2, all_error] = hdcpredictproj  (reduced_L_TS_COMPLETE_4, reduced_TS_COMPLETE_04, reduced_TS_COMPLETE_14, reduced_TS_COMPLETE_24, reduced_TS_COMPLETE_34, reduced_TS_COMPLETE_44, hdc_model_2, chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, classes, channels_l, channels_l_EEG, channels_l_GSR, channels_l_BVP, channels_l_RES);
+
+accuracy(N,2) = acc2;
+acc2
+acc_matrix((randCounter*4),(D/1000)) = acc2*100;
+acc_matrix_L(randCounter,(D/1000)) = acc2*100;
+acc_hamclass_L(randCounter,1) = sum(xor(hdc_model_2(0),hdc_model_2(1)));
+
+%acc_ngram_1(N,j)=acc1;
+acc_ngram_L(N,j)=acc2;
 
 %% D
 
-% fprintf ('HDC for D\n');
-% if (select == 1)
-%     [numpat, hdc_model_2] = hdctrainproj (classes, reduced_L_SAMPL_DATA_3,reduced_SAMPL_DATA_03, reduced_SAMPL_DATA_13, reduced_SAMPL_DATA_23, reduced_SAMPL_DATA_33, reduced_SAMPL_DATA_43,chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, channels_l, channels_l_EEG, channels_l_GSR, channels_l_BVP, channels_l_RES);
-% else
-%     [numpat_2, hdc_model_2] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_2, chAM8, iMch1, D, N, precision, channels_a,projM1_pos,projM1_neg, classes); 
-%     [numpat_4, hdc_model_4] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_4, chAM8, iMch3, D, N, precision, channels_a_ECG,projM3_pos,projM3_neg, classes); 
-%     [numpat_6, hdc_model_6] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_6, chAM8, iMch5, D, N, precision, channels_a_EEG,projM5_pos,projM5_neg, classes); 
-% end
-% 
-% %bundle all the sensors (this is the fusion point)
-% if (select ~= 1)
-%     %class 1
-%     hdc_model_2(0)=mode([hdc_model_2(0); hdc_model_4(0); hdc_model_6(0)]);
-%     %class 2
-%     hdc_model_2(1)=mode([hdc_model_2(1); hdc_model_4(1); hdc_model_6(1)]);
-% end
-% 
-% [acc_ex2, acc2, pl2, al2, all_error] = hdcpredictproj  (reduced_L_TS_COMPLETE_3, reduced_TS_COMPLETE_03, reduced_TS_COMPLETE_13, reduced_TS_COMPLETE_23, reduced_TS_COMPLETE_33, reduced_TS_COMPLETE_43, hdc_model_2, chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, classes, channels_d, channels_d_EEG, channels_d_GSR, channels_d_BVP, channels_d_RES);
-% 
-% accuracy(N,2) = acc2;
-% acc2
-% acc_matrix((randCounter*4 - 1),(D/1000)) = acc2*100;
-% acc_matrix_D(randCounter,(D/1000)) = acc2*100;
-% acc_hamclass_D(randCounter,1) = sum(xor(hdc_model_2(0),hdc_model_2(1)));
-% 
-% acc_ngram_D(N,j)=acc2;
+fprintf ('HDC for D\n');
+if (select == 1)
+    [numpat, hdc_model_2] = hdctrainproj (classes, reduced_L_SAMPL_DATA_3,reduced_SAMPL_DATA_03, reduced_SAMPL_DATA_13, reduced_SAMPL_DATA_23, reduced_SAMPL_DATA_33, reduced_SAMPL_DATA_43,chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, channels_l, channels_l_EEG, channels_l_GSR, channels_l_BVP, channels_l_RES);
+else
+    [numpat_2, hdc_model_2] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_2, chAM8, iMch1, D, N, precision, channels_a,projM1_pos,projM1_neg, classes); 
+    [numpat_4, hdc_model_4] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_4, chAM8, iMch3, D, N, precision, channels_a_ECG,projM3_pos,projM3_neg, classes); 
+    [numpat_6, hdc_model_6] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_6, chAM8, iMch5, D, N, precision, channels_a_EEG,projM5_pos,projM5_neg, classes); 
+end
+
+%bundle all the sensors (this is the fusion point)
+if (select ~= 1)
+    %class 1
+    hdc_model_2(0)=mode([hdc_model_2(0); hdc_model_4(0); hdc_model_6(0)]);
+    %class 2
+    hdc_model_2(1)=mode([hdc_model_2(1); hdc_model_4(1); hdc_model_6(1)]);
+end
+
+[acc_ex2, acc2, pl2, al2, all_error] = hdcpredictproj  (reduced_L_TS_COMPLETE_3, reduced_TS_COMPLETE_03, reduced_TS_COMPLETE_13, reduced_TS_COMPLETE_23, reduced_TS_COMPLETE_33, reduced_TS_COMPLETE_43, hdc_model_2, chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, classes, channels_d, channels_d_EEG, channels_d_GSR, channels_d_BVP, channels_d_RES);
+
+accuracy(N,2) = acc2;
+acc2
+acc_matrix((randCounter*4 - 1),(D/1000)) = acc2*100;
+acc_matrix_D(randCounter,(D/1000)) = acc2*100;
+acc_hamclass_D(randCounter,1) = sum(xor(hdc_model_2(0),hdc_model_2(1)));
+
+acc_ngram_D(N,j)=acc2;
 
 %% V
 
@@ -659,16 +658,13 @@ if (select ~= 1)
     hdc_model_2(1)=mode([hdc_model_2(1); hdc_model_4(1); hdc_model_6(1)]);
 end
 
-[acc_ex2, acc2, pl2v, al2v, all_error] = hdcpredictproj  (reduced_L_TS_COMPLETE_2, reduced_TS_COMPLETE_02, reduced_TS_COMPLETE_12, reduced_TS_COMPLETE_22, reduced_TS_COMPLETE_32, reduced_TS_COMPLETE_42, hdc_model_2, chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, classes, channels_d, channels_d_EEG, channels_d_GSR, channels_d_BVP, channels_d_RES);
+[acc_ex2, acc2, pl2, al2, all_error] = hdcpredictproj  (reduced_L_TS_COMPLETE_2, reduced_TS_COMPLETE_02, reduced_TS_COMPLETE_12, reduced_TS_COMPLETE_22, reduced_TS_COMPLETE_32, reduced_TS_COMPLETE_42, hdc_model_2, chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, classes, channels_d, channels_d_EEG, channels_d_GSR, channels_d_BVP, channels_d_RES);
 
 accuracy(N,2) = acc2;
 acc2
 acc_matrix((randCounter*4 - 2),(D/1000)) = acc2*100;
 acc_matrix_V(randCounter,(D/1000)) = acc2*100;
 acc_hamclass_V(randCounter,1) = sum(xor(hdc_model_2(0),hdc_model_2(1)));
-val_right = (pl2v' == al2v);
-first_5_acc_val = sum(val_right(1:40,:));
-second_5_acc_val = sum(val_right(41:80,:));
 
 acc_ngram_V(N,j)=acc2;
 
@@ -690,16 +686,14 @@ if (select ~= 1)
     hdc_model_2(1)=mode([hdc_model_2(1); hdc_model_4(1); hdc_model_6(1)]);
 end
 
-[acc_ex2, acc2, pl2a, al2a, all_error] = hdcpredictproj  (reduced_L_TS_COMPLETE_1, reduced_TS_COMPLETE_01, reduced_TS_COMPLETE_11, reduced_TS_COMPLETE_21, reduced_TS_COMPLETE_31, reduced_TS_COMPLETE_41, hdc_model_2, chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, classes, channels_d, channels_d_EEG, channels_d_GSR, channels_d_BVP, channels_d_RES);
+[acc_ex2, acc2, pl2, al2, all_error] = hdcpredictproj  (reduced_L_TS_COMPLETE_1, reduced_TS_COMPLETE_01, reduced_TS_COMPLETE_11, reduced_TS_COMPLETE_21, reduced_TS_COMPLETE_31, reduced_TS_COMPLETE_41, hdc_model_2, chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, classes, channels_d, channels_d_EEG, channels_d_GSR, channels_d_BVP, channels_d_RES);
 
 accuracy(N,2) = acc2;
 acc2
 acc_matrix((randCounter*4 - 3),(D/1000)) = acc2*100;
 acc_matrix_A(randCounter,(D/1000)) = acc2*100;
 acc_hamclass_A(randCounter,1) = sum(xor(hdc_model_2(0),hdc_model_2(1)));
-ar_right = (pl2a' == al2a);
-first_5_acc_ar = sum(ar_right(1:40,:));
-second_5_acc_ar = sum(ar_right(41:80,:));
+
 %acc_ngram_1(N,j)=acc1;
 acc_ngram_A(N,j)=acc2;
 end

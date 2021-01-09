@@ -1,5 +1,5 @@
 
-function message = HD_functions_mod_reduced_cim
+function message = HD_functions_mod_reduced_cimind
   assignin('base','genBRandomHV', @genBRandomHV); 
   assignin('base','projBRandomHV', @projBRandomHV); 
   assignin('base','initItemMemories', @initItemMemories);
@@ -112,12 +112,14 @@ function [CiM, iM] = initItemMemories (D, MAXL, channels)
 	currentHV = initHV;
 	randomIndex = randperm (D);
 	
-    for i = 0:1:MAXL
-        CiM(i) = currentHV; 
-        SP = floor(D/2/MAXL);
-		startInx = (i*SP) + 1;
-		endInx = ((i+1)*SP) + 1;
-		currentHV (randomIndex(startInx : endInx)) = not(currentHV (randomIndex(startInx: endInx)));
+    for y = 1:1:channels
+        for i = 0:1:MAXL
+            CiM(i) = currentHV; 
+            SP = floor(D/2/MAXL);
+            startInx = (i*SP) + 1;
+            endInx = ((i+1)*SP) + 1;
+            currentHV (randomIndex(startInx : endInx)) = not(currentHV (randomIndex(startInx: endInx)));
+        end
     end
 end
 
@@ -140,7 +142,7 @@ function randomHV = lookupItemMemeory (itemMemory, rawKey, precision)
     if itemMemory.isKey (key) 
         randomHV = itemMemory (key);
     else
-        fprintf ('CANNOT FIND THIS KEY: %d\n', key);       
+        fprintf ('CANNOT FIND THIS KEY: %d\n', key);  
     end
 end
 
@@ -277,7 +279,7 @@ function randomHV = projItemMemeory_bin (projM_pos, projM_neg, voffeature,ioffea
 
 end
 
-function v = computeNgramproj (buffer, CiM, N, precision, iM, channels,projM_pos, projM_neg, sample_index,D)
+function v = computeNgramproj (buffer, CiM, N, precision, iM, channels,sample_index,D)
 % 	DESCRIPTION: computes the N-gram
 % 	INPUTS:
 % 	buffer   :  data input
@@ -290,23 +292,25 @@ function v = computeNgramproj (buffer, CiM, N, precision, iM, channels,projM_pos
 % 	Ngram    :  query hypervector
     
     %setup for first sample duplicate for all modalities
-    chHV = projItemMemeory_bin (projM_pos, projM_neg, buffer(sample_index, 1),1,D);
+    chHV = lookupItemMemeory (CiM, buffer(sample_index, 1), precision);
+    %chHV = projItemMemeory_bin (projM_pos, projM_neg, buffer(sample_index, 1),1,D);
     chHV = xor(chHV , iM(1));
     v = chHV;
     if channels>1    
-    for i = 2 : channels
-        chHV = projItemMemeory_bin (projM_pos, projM_neg, buffer(sample_index, i), i,D);
-        chHV = xor(chHV , iM(i));
-        if i == 2
-            ch2HV=chHV; 
+        for i = 2 : channels
+            chHV = lookupItemMemeory (CiM, buffer(sample_index, i), precision);
+            %chHV = projItemMemeory_bin (projM_pos, projM_neg, buffer(sample_index, i), i,D);
+            chHV = xor(chHV , iM(i));
+            if i == 2
+                ch2HV=chHV; 
+            end
+            %create matrix of all channel final outputs to be bundled
+            v = [v; chHV];
         end
-        %create matrix of all channel final outputs to be bundled
-        v = [v; chHV];
-    end
-    
-    %don't understand why adding the xor of the final and 2nd channel
-    chHV = xor(chHV , ch2HV);
-    v = [v; chHV]; 
+
+        %don't understand why adding the xor of the final and 2nd channel
+        chHV = xor(chHV , ch2HV);
+        v = [v; chHV]; 
     end
     
 %     %Add the other modalities
@@ -640,8 +644,8 @@ function [accExcTrnz, accuracy, predicLabel, actualLabel, all_error] = hdcpredic
    
 	    [predict_hamm, error, second_error] = hamming(sigHV, AM, classes);
         predicLabel(i : i+N-1) = predict_hamm;
-        all_error = [all_error error]; %#ok<AGROW>
-        second_error_all = [second_error_all second_error]; %#ok<AGROW>
+        %all_error = [all_error error]; %#ok<AGROW>
+        %second_error_all = [second_error_all second_error]; %#ok<AGROW>
         if predict_hamm == actualLabel(i)
 			correct = correct + 1;
         elseif labelTestSet1 (i) ~= labelTestSet1(i+N-1)

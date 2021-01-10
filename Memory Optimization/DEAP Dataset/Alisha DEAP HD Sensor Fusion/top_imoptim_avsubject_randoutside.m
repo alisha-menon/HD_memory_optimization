@@ -21,7 +21,7 @@ clear;
 % select = 2 for late fusion
 select = 1;
 if (select == 1)
-    HD_functions_mod_reduced;     % load HD functions
+    HD_functions_mod_reduced;     % load HD functions from reva's forked repo for random training
 else 
     HD_functions_multiplex;
 end

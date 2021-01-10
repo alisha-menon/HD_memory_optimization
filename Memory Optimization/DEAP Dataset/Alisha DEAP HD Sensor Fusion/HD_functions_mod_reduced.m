@@ -45,12 +45,12 @@ function [L1, L2, L_SAMPL_DATA_train, SAMPL_DATA_train, L_SAMPL_DATA_test,SAMPL_
 	L7 = find (labels == 7);
     
     % want to select randomly of the labels to train
-    %randomizedL1 = L1(randperm(length(L1)));
-    %randomizedL2 = L2(randperm(length(L2)));
-    %L1 = randomizedL1 (1 : floor(length(randomizedL1) * trainingFrac));
-    %L2 = randomizedL2 (1 : floor(length(randomizedL2) * trainingFrac));
-    L1 = L1 (1 : floor(length(L1) * trainingFrac));
-    L2 = L2 (1 : floor(length(L2) * trainingFrac));
+    randomizedL1 = L1(randperm(length(L1)));
+    randomizedL2 = L2(randperm(length(L2)));
+    L1 = randomizedL1 (1 : floor(length(randomizedL1) * trainingFrac));
+    L2 = randomizedL2 (1 : floor(length(randomizedL2) * trainingFrac));
+%     L1 = L1 (1 : floor(length(L1) * trainingFrac));
+%     L2 = L2 (1 : floor(length(L2) * trainingFrac));
     L3 = L3 (1 : floor(length(L3) * trainingFrac));
     L4 = L4 (1 : floor(length(L4) * trainingFrac));
     L5 = L5 (1 : floor(length(L5) * trainingFrac));

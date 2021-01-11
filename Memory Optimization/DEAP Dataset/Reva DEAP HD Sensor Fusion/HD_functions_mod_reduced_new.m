@@ -14,6 +14,7 @@ function message = HD_functions_mod_reduced
   assignin('base','genTrainData', @genTrainData);
   assignin('base','select_traintest', @select_traintest);
   assignin('base','genTrainTestData', @genTrainTestData);
+  assignin('base','genTrainTestExtremeData', @genTrainTestExtremeData);
   assignin('base','lookupItemMemeory', @lookupItemMemeory);
   assignin('base','hamming', @hamming);
   message='Importing all HD functions';
@@ -91,6 +92,118 @@ function [L1, L2, L_SAMPL_DATA_train, SAMPL_DATA_train, L_SAMPL_DATA_test,SAMPL_
     SAMPL_DATA_train   = [SAMPL_DATA_train; (data(L5(Inx5), :))];
 	SAMPL_DATA_train   = [SAMPL_DATA_train; (data(L6(Inx6), :))];
 	SAMPL_DATA_train   = [SAMPL_DATA_train; (data(L7(Inx7), :))];
+    remaining_labels = labels;
+    remaining_labels([L1(Inx1);L2(Inx2)]) = [];
+    remaining_data = data;
+    remaining_data([L1(Inx1);L2(Inx2)],:) = [];
+    L_SAMPL_DATA_test = remaining_labels;
+    SAMPL_DATA_test = remaining_data;
+end
+
+function [L1, L2, L_SAMPL_DATA_train, SAMPL_DATA_train, L_SAMPL_DATA_test, SAMPL_DATA_test] = genTrainTestExtremeData (data, labels, trainingFrac, order)
+%
+% DESCRIPTION   : generates a dataset to train the alorithm using a fraction of the input data 
+%
+% INPUTS:
+%   data        : input data
+%   labels      : input labels
+%   trainingFrac: the fraction of data we should use to output a training dataset
+%   order       : whether preserve the order of inputs (inorder) or randomly select
+%   donwSampRate: the rate or stride of downsampling
+% OUTPUTS:
+%   SAMPL_DATA  : dataset for training
+%   L_SAMPL_DATA: corresponding labels
+%    
+
+	%rng('default');
+    %rng(1);
+    
+    L5 = find (labels < 5);
+	L6 = find (labels >= 5);
+    L1 = find (labels <= 3);
+    L2 = find (labels >= 7);
+    L3 = find (labels > 3 & labels < 5);
+    L4 = find (labels > 5 & labels < 7);
+	L7 = find (labels == 7);
+    
+    
+    % want to select randomly of the labels to train
+    %randomizedL1 = L1(randperm(length(L1)));
+    %randomizedL2 = L2(randperm(length(L2)));
+    %L1 = randomizedL1 (1 : floor(length(randomizedL1) * trainingFrac));
+    %L2 = randomizedL2 (1 : floor(length(randomizedL2) * trainingFrac));
+%     L1 = L1 (1 : floor(length(L1) * trainingFrac));
+%     L2 = L2 (1 : floor(length(L2) * trainingFrac));
+%     L3 = L3 (1 : floor(length(L3) * trainingFrac));
+%     L4 = L4 (1 : floor(length(L4) * trainingFrac));
+%     L5 = L5 (1 : floor(length(L5) * trainingFrac));
+%     L6 = L6 (1 : floor(length(L6) * trainingFrac));
+% 	  L7 = L7 (1 : floor(length(L7) * trainingFrac));
+    
+    train_count1 = floor(length(L5) * trainingFrac);
+    train_count2 = floor(length(L6) * trainingFrac);
+    
+    
+    if length(L1) > train_count1
+        randomizedL1 = L1(randperm(length(L1)));
+        L1 = randomizedL1(1:train_count1);
+    elseif length(L1) < train_count1
+        randomizedL3 = L3(randperm(length(L3)));
+        L1 = [L1;randomizedL3(1:train_count1 - length(L1))];
+    end
+    
+    if length(L2) > train_count2
+        randomizedL2 = L2(randperm(length(L2)));
+        L2 = randomizedL2(1:train_count2);
+    elseif length(L2) < train_count2
+        randomizedL4 = L4(randperm(length(L4)));
+        L2 = [L2;randomizedL4(1:train_count2 - length(L2))];
+    end
+ 
+    if order == 'inorder' %#ok<BDSCA>
+		Inx1 = 1:1:length(L1);
+		Inx2 = 1:1:length(L2);
+		Inx3 = 1:1:length(L3);
+		Inx4 = 1:1:length(L4);
+		Inx5 = 1:1:length(L5);
+		Inx6 = 1:1:length(L6);
+		Inx7 = 1:1:length(L7);
+	else
+		Inx1 = randperm (length(L1));
+		Inx2 = randperm (length(L2));
+		Inx3 = randperm (length(L3));
+		Inx4 = randperm (length(L4));
+		Inx5 = randperm (length(L5));
+		Inx6 = randperm (length(L6));
+		Inx7 = randperm (length(L7));
+    end
+    
+    labels(labels < 5) = 1;
+    labels(labels >= 5) = 2;
+    
+    if isrow(L1)
+        L1 = L1.';
+    end
+    if isrow(L2)
+        L2 = L2.';
+    end
+
+    L_SAMPL_DATA_train = labels (L1(Inx1));
+    L_SAMPL_DATA_train = [L_SAMPL_DATA_train; (labels(L2(Inx2)))];
+%     L_SAMPL_DATA_train = [L_SAMPL_DATA_train; (labels(L3(Inx3)))];
+%     L_SAMPL_DATA_train = [L_SAMPL_DATA_train; (labels(L4(Inx4)))];
+%     L_SAMPL_DATA_train = [L_SAMPL_DATA_train; (labels(L5(Inx5)))];
+% 	  L_SAMPL_DATA_train = [L_SAMPL_DATA_train; (labels(L6(Inx6)))];
+% 	  L_SAMPL_DATA_train = [L_SAMPL_DATA_train; (labels(L7(Inx7)))];
+    %L_SAMPL_DATA = L_SAMPL_DATA';
+    
+    SAMPL_DATA_train   = data (L1(Inx1), :);
+    SAMPL_DATA_train   = [SAMPL_DATA_train; (data(L2(Inx2), :))];
+%     SAMPL_DATA_train   = [SAMPL_DATA_train; (data(L3(Inx3), :))];
+%     SAMPL_DATA_train   = [SAMPL_DATA_train; (data(L4(Inx4), :))];
+%     SAMPL_DATA_train   = [SAMPL_DATA_train; (data(L5(Inx5), :))];
+% 	  SAMPL_DATA_train   = [SAMPL_DATA_train; (data(L6(Inx6), :))];
+% 	  SAMPL_DATA_train   = [SAMPL_DATA_train; (data(L7(Inx7), :))];
     remaining_labels = labels;
     remaining_labels([L1(Inx1);L2(Inx2)]) = [];
     remaining_data = data;

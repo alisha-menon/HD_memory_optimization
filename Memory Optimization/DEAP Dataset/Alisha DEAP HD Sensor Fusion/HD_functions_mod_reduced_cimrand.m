@@ -1,5 +1,5 @@
 
-function message = HD_functions_mod_reduced_cimind
+function message = HD_functions_mod_reduced_cim_rand
   assignin('base','genBRandomHV', @genBRandomHV); 
   assignin('base','projBRandomHV', @projBRandomHV); 
   assignin('base','initItemMemories', @initItemMemories);
@@ -112,14 +112,12 @@ function [CiM, iM] = initItemMemories (D, MAXL, channels)
 	currentHV = initHV;
 	randomIndex = randperm (D);
 	
-    for y = 1:1:channels
-        for i = 0:1:MAXL
-            CiM(i) = currentHV; 
-            SP = floor(D/2/MAXL);
-            startInx = (i*SP) + 1;
-            endInx = ((i+1)*SP) + 1;
-            currentHV (randomIndex(startInx : endInx)) = not(currentHV (randomIndex(startInx: endInx)));
-        end
+    for i = 0:1:MAXL
+        CiM(i) = currentHV; 
+        SP = floor(D/2/MAXL);
+		startInx = (i*SP) + 1;
+		endInx = ((i+1)*SP) + 1;
+		currentHV (randomIndex(startInx : endInx)) = not(currentHV (randomIndex(startInx: endInx)));
     end
 end
 

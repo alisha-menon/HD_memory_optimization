@@ -1,5 +1,5 @@
 
-function message = HD_functions_mod_reduced
+function message = HD_functions_avsubject_cimind_randtt
   assignin('base','genBRandomHV', @genBRandomHV); 
   assignin('base','projBRandomHV', @projBRandomHV); 
   assignin('base','initItemMemories', @initItemMemories);
@@ -45,12 +45,12 @@ function [L1, L2, L_SAMPL_DATA_train, SAMPL_DATA_train, L_SAMPL_DATA_test,SAMPL_
 	L7 = find (labels == 7);
     
     % want to select randomly of the labels to train
-    %randomizedL1 = L1(randperm(length(L1)));
-    %randomizedL2 = L2(randperm(length(L2)));
-    %L1 = randomizedL1 (1 : floor(length(randomizedL1) * trainingFrac));
-    %L2 = randomizedL2 (1 : floor(length(randomizedL2) * trainingFrac));
-    L1 = L1 (1 : floor(length(L1) * trainingFrac));
-    L2 = L2 (1 : floor(length(L2) * trainingFrac));
+    randomizedL1 = L1(randperm(length(L1)));
+    randomizedL2 = L2(randperm(length(L2)));
+    L1 = randomizedL1 (1 : floor(length(randomizedL1) * trainingFrac));
+    L2 = randomizedL2 (1 : floor(length(randomizedL2) * trainingFrac));
+%     L1 = L1 (1 : floor(length(L1) * trainingFrac));
+%     L2 = L2 (1 : floor(length(L2) * trainingFrac));
     L3 = L3 (1 : floor(length(L3) * trainingFrac));
     L4 = L4 (1 : floor(length(L4) * trainingFrac));
     L5 = L5 (1 : floor(length(L5) * trainingFrac));
@@ -204,16 +204,21 @@ function [CiM, iM] = initItemMemories (D, MAXL, channels)
 	currentHV = initHV;
 	randomIndex = randperm (D);
 	
-    for i = 0:1:MAXL
-        CiM(i) = currentHV; 
-        SP = floor(D/2/MAXL);
-		startInx = (i*SP) + 1;
-		endInx = ((i+1)*SP) + 1;
-		currentHV (randomIndex(startInx : endInx)) = not(currentHV (randomIndex(startInx: endInx)));
+    for y = 1:1:channels
+        initHV = genRandomHV (D);
+        currentHV = initHV;
+        randomIndex = randperm (D);
+        for i = 0:1:MAXL
+            CiM((MAXL+1)*(y-1)+i) = currentHV; 
+            SP = floor(D/2/MAXL);
+            startInx = (i*SP) + 1;
+            endInx = ((i+1)*SP) + 1;
+            currentHV (randomIndex(startInx : endInx)) = not(currentHV (randomIndex(startInx: endInx)));
+        end
     end
 end
 
-function randomHV = lookupItemMemeory (itemMemory, rawKey, precision)
+function randomHV = lookupItemMemeory (itemMemory, rawKey, precision,channel)
 %
 % DESCRIPTION   : recalls a vector from item Memory based on inputs
 %
@@ -228,11 +233,11 @@ function randomHV = lookupItemMemeory (itemMemory, rawKey, precision)
 
  
     key = int64 (rawKey * precision);
-  
-    if itemMemory.isKey (key) 
-        randomHV = itemMemory (key);
+    keyfull = key + (precision+1)*(channel-1);
+    if itemMemory.isKey (keyfull) 
+        randomHV = itemMemory (keyfull);
     else
-        fprintf ('CANNOT FIND THIS KEY: %d\n', key);       
+        fprintf ('CANNOT FIND THIS KEY: %d\n', keyfull);       
     end
 end
 
@@ -370,7 +375,7 @@ function randomHV = projItemMemeory_bin (projM_pos, projM_neg, voffeature,ioffea
 
 end
 
-function v = computeNgramproj (buffer, CiM, N, precision, iM, channels,projM_pos, projM_neg, sample_index,D)
+function v = computeNgramproj (buffer, CiM, N, precision, iM, channels,sample_index,D)
 % 	DESCRIPTION: computes the N-gram
 % 	INPUTS:
 % 	buffer   :  data input
@@ -406,12 +411,14 @@ function v = computeNgramproj (buffer, CiM, N, precision, iM, channels,projM_pos
     else
         v = zeros(channels+1,D);
     end
-    chHV = projItemMemeory_bin (projM_pos, projM_neg, buffer(sample_index, 1),1,D);
+    chHV = lookupItemMemeory (CiM, buffer(sample_index, 1), precision,1);
+    %chHV = projItemMemeory_bin (projM_pos, projM_neg, buffer(sample_index, 1),1,D);
     chHV = xor(chHV , iM(1));
     v(1,:) = chHV;
     if channels>1    
         for i = 2 : channels
-            chHV = projItemMemeory_bin (projM_pos, projM_neg, buffer(sample_index, i), i,D);
+            %chHV = projItemMemeory_bin (projM_pos, projM_neg, buffer(sample_index, i), i,D);
+            chHV = lookupItemMemeory (CiM, buffer(sample_index, i), precision,i);
             chHV = xor(chHV , iM(i));
             if i == 2
                 ch2HV=chHV; 
@@ -774,7 +781,7 @@ end
 %   
 % end
 
-function [AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, trainSet3, trainSet4, trainSet5, CiM, iM1, iM2, iM3, iM4, iM5, D, N, precision, channels1, channels2, channels3, channels4, channels5, projM1_pos, projM1_neg, projM2_pos, projM2_neg, projM3_pos, projM3_neg, projM4_pos, projM4_neg, projM5_pos, projM5_neg) 
+function [AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, trainSet3, trainSet4, trainSet5, CiM1, CiM2, CiM3, CiM4, CiM5, iM1, iM2, iM3, iM4, iM5, D, N, precision, channels1, channels2, channels3, channels4, channels5) 
 %
 % DESCRIPTION   : train an associative memory based on input training data
 %
@@ -813,11 +820,11 @@ function [AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, tra
             %stop bundling and move onto the next sample for the next label for
             %all modalities
             %setup first Ngram
-            v1 = computeNgramproj (trainSet1 (i : i+N-1,:), CiM, N, precision, iM1, channels1,projM1_pos, projM1_neg, 1,D);
-            v2 = computeNgramproj (trainSet2 (i : i+N-1,:), CiM, N, precision, iM2, channels2,projM2_pos, projM2_neg, 1,D);
-            v3 = computeNgramproj (trainSet3 (i : i+N-1,:), CiM, N, precision, iM3, channels3,projM3_pos, projM3_neg, 1,D);
-            v4 = computeNgramproj (trainSet4 (i : i+N-1,:), CiM, N, precision, iM4, channels4,projM4_pos, projM4_neg, 1,D);
-            v5 = computeNgramproj (trainSet5 (i : i+N-1,:), CiM, N, precision, iM5, channels5,projM5_pos, projM5_neg, 1,D);
+            v1 = computeNgramproj (trainSet1 (i : i+N-1,:), CiM1, N, precision, iM1, channels1,1,D);
+            v2 = computeNgramproj (trainSet2 (i : i+N-1,:), CiM2, N, precision, iM2, channels2, 1,D);
+            v3 = computeNgramproj (trainSet3 (i : i+N-1,:), CiM3, N, precision, iM3, channels3,1,D);
+            v4 = computeNgramproj (trainSet4 (i : i+N-1,:), CiM4, N, precision, iM4, channels4,1,D);
+            v5 = computeNgramproj (trainSet5 (i : i+N-1,:), CiM5, N, precision, iM5, channels5,1,D);
             if channels1==1
                 ngram1 = v1;
             else
@@ -845,31 +852,31 @@ function [AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, tra
             end
             ngram=mode([ngram1;ngram2;ngram3;ngram4;ngram5]);
             for sample_index = 2:1:N
-                v1 = computeNgramproj (trainSet1 (i : i+N-1,:), CiM, N, precision, iM1, channels1,projM1_pos, projM1_neg, sample_index,D);
+                v1 = computeNgramproj (trainSet1 (i : i+N-1,:), CiM1, N, precision, iM1, channels1,sample_index,D);
                 if channels1==1
                     record1 = v1;          
                 else
                     record1 = mode(v1); 
                 end
-                v2 = computeNgramproj (trainSet2 (i : i+N-1,:), CiM, N, precision, iM2, channels2,projM2_pos, projM2_neg, sample_index,D);
+                v2 = computeNgramproj (trainSet2 (i : i+N-1,:), CiM2, N, precision, iM2, channels2, sample_index,D);
                 if channels2==1
                     record2 = v2;          
                 else
                     record2 = mode(v2); 
                 end
-                v3 = computeNgramproj (trainSet3 (i : i+N-1,:), CiM, N, precision, iM3, channels3,projM3_pos, projM3_neg, sample_index,D);
+                v3 = computeNgramproj (trainSet3 (i : i+N-1,:), CiM3, N, precision, iM3, channels3, sample_index,D);
                 if channels3==1
                     record3 = v3;          
                 else
                     record3 = mode(v3); 
                 end
-                v4 = computeNgramproj (trainSet4 (i : i+N-1,:), CiM, N, precision, iM4, channels4,projM4_pos, projM4_neg, sample_index,D);
+                v4 = computeNgramproj (trainSet4 (i : i+N-1,:), CiM4, N, precision, iM4, channels4, sample_index,D);
                 if channels4==1
                     record4 = v4;          
                 else
                     record4 = mode(v4); 
                 end
-                v5 = computeNgramproj (trainSet5 (i : i+N-1,:), CiM, N, precision, iM5, channels5,projM5_pos, projM5_neg, sample_index,D);
+                v5 = computeNgramproj (trainSet5 (i : i+N-1,:), CiM5, N, precision, iM5, channels5,sample_index,D);
                 if channels5==1
                     record5 = v5;          
                 else
@@ -891,7 +898,7 @@ function [AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, tra
             %that label, then move onto next label
             %trainVecList(1 , :) = 3;
             %label
-            if (mod(size(trainVecList((i-count_label):(i-1),1),1) == 1)
+            if (mod(size(trainVecList((i-count_label):(i-1),1),1),2) == 1)
                 if (size(trainVecList,1) == 1)
                     AM(label) = trainVecList(1,:);
                 else
@@ -915,7 +922,7 @@ function [AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, tra
     %wrap up the last training class
     %labelTrainSet1(l)
     %trainVecList(1 , :) = 3;
-    if (mod(size(trainVecList((i-count_label):(i-1),1),2) == 1)
+    if (mod(size(trainVecList((i-count_label):(i-1),1),1),2) == 1)
         if (size(trainVecList,1) == 1)
             AM(label) = trainVecList(1,:);
         else
@@ -932,7 +939,7 @@ function [AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, tra
     end
 end
 
-function [accexc_alltrz, accExcTrnz, accuracy, predicLabel, actualLabel, all_error, tranzError] = hdcpredictproj (labelTestSet1, testSet1, testSet2, testSet3, testSet4, testSet5 , AM, CiM, iM1, iM2, iM3, iM4, iM5, D, N, precision, classes, channels1, channels2, channels3, channels4, channels5, projM1_pos, projM1_neg, projM2_pos, projM2_neg, projM3_pos, projM3_neg, projM4_pos, projM4_neg, projM5_pos, projM5_neg) 
+function [accexc_alltrz, accExcTrnz, accuracy, predicLabel, actualLabel, all_error, tranzError] = hdcpredictproj (labelTestSet1, testSet1, testSet2, testSet3, testSet4, testSet5 , AM,CiM1, CiM2, CiM3, CiM4, CiM5, iM1, iM2, iM3, iM4, iM5, D, N, precision, classes, channels1, channels2, channels3, channels4, channels5) 
 %
 % DESCRIPTION   : test accuracy based on input testing data
 %
@@ -963,11 +970,11 @@ function [accexc_alltrz, accExcTrnz, accuracy, predicLabel, actualLabel, all_err
 		numTests = numTests + 1;
 		actualLabel(i : i+N-1,:) = mode(labelTestSet1 (i : i+N-1));
         %% setup first Ngram for all modalities
-        v1 = computeNgramproj (testSet1 (i : i+N-1,:), CiM, N, precision, iM1, channels1,projM1_pos, projM1_neg,1,D);
-        v2 = computeNgramproj (testSet2 (i : i+N-1,:), CiM, N, precision, iM2, channels2,projM2_pos, projM2_neg,1,D);
-        v3 = computeNgramproj (testSet3 (i : i+N-1,:), CiM, N, precision, iM3, channels3,projM3_pos, projM3_neg,1,D);
-        v4 = computeNgramproj (testSet4 (i : i+N-1,:), CiM, N, precision, iM4, channels4,projM4_pos, projM4_neg, 1,D);
-        v5 = computeNgramproj (testSet5 (i : i+N-1,:), CiM, N, precision, iM5, channels5,projM5_pos, projM5_neg, 1,D);
+        v1 = computeNgramproj (testSet1 (i : i+N-1,:), CiM1, N, precision, iM1, channels1,1,D);
+        v2 = computeNgramproj (testSet2 (i : i+N-1,:), CiM2, N, precision, iM2, channels2,1,D);
+        v3 = computeNgramproj (testSet3 (i : i+N-1,:), CiM3, N, precision, iM3, channels3,1,D);
+        v4 = computeNgramproj (testSet4 (i : i+N-1,:), CiM4, N, precision, iM4, channels4,1,D);
+        v5 = computeNgramproj (testSet5 (i : i+N-1,:), CiM5, N, precision, iM5, channels5,1,D);
         
         if channels1==1
             sigHV1 = v1;
@@ -998,31 +1005,31 @@ function [accexc_alltrz, accExcTrnz, accuracy, predicLabel, actualLabel, all_err
         sigHV=mode([sigHV1;sigHV2;sigHV3;sigHV4;sigHV5]);
         %% setup spatial encoder outputs for all channels for all modalities N-1 samples
         for sample_index = 2:1:N
-            v1 = computeNgramproj (testSet1 (i : i+N-1,:), CiM, N, precision, iM1, channels1,projM1_pos, projM1_neg, sample_index,D);
+            v1 = computeNgramproj (testSet1 (i : i+N-1,:), CiM1, N, precision, iM1, channels1, sample_index,D);
             if channels1==1
                 record1 = v1;          
             else
                 record1 = mode(v1); 
             end
-            v2 = computeNgramproj (testSet2 (i : i+N-1,:), CiM, N, precision, iM2, channels2,projM2_pos, projM2_neg, sample_index,D);
+            v2 = computeNgramproj (testSet2 (i : i+N-1,:), CiM2, N, precision, iM2, channels2, sample_index,D);
             if channels2==1
                 record2 = v2;          
             else
                 record2 = mode(v2); 
             end
-            v3 = computeNgramproj (testSet3 (i : i+N-1,:), CiM, N, precision, iM3, channels3,projM3_pos, projM3_neg, sample_index,D);
+            v3 = computeNgramproj (testSet3 (i : i+N-1,:), CiM3, N, precision, iM3, channels3, sample_index,D);
             if channels3==1
                 record3 = v3;          
             else
                 record3 = mode(v3); 
             end
-            v4 = computeNgramproj (testSet4 (i : i+N-1,:), CiM, N, precision, iM4, channels4,projM4_pos, projM4_neg, sample_index,D);
+            v4 = computeNgramproj (testSet4 (i : i+N-1,:), CiM4, N, precision, iM4, channels4, sample_index,D);
             if channels4==1
                 record4 = v4;          
             else
                 record4 = mode(v4); 
             end
-            v5 = computeNgramproj (testSet5 (i : i+N-1,:), CiM, N, precision, iM5, channels5,projM5_pos, projM5_neg, sample_index,D);
+            v5 = computeNgramproj (testSet5 (i : i+N-1,:), CiM5, N, precision, iM5, channels5, sample_index,D);
             if channels5==1
                 record5 = v5;          
             else

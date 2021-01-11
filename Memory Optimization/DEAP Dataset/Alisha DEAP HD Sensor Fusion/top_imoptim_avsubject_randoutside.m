@@ -21,18 +21,18 @@ clear;
 % select = 2 for late fusion
 select = 1;
 if (select == 1)
-    HD_functions_mod_reduced;     % load HD functions from reva's forked repo for random training
+    HD_functions_mod_reduced;     % load HD functions
 else 
     HD_functions_multiplex;
 end
 
 %%
-randCounter= 10; %per subject
+randCounter= 5; %per subject
 full_count = randCounter;
 learningrate=0.5; % percentage of the dataset used to train the algorithm
 downSampRate = 1;
 ngram = 3; % for temporal encode
-subjects = 32;
+subjects = 2;
 % D_full = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]; %dimension of the hypervectors
 D_full = [10000];
 maxL = 2; % for CiM
@@ -118,7 +118,7 @@ while (randCounter>0)
          features(:,k)=features(:,k)/max(features(:,k));
         end
 
-        foir i=1:238
+        for i=1:238
          features(:,i)=2*features(:,i)-1;
         end
 

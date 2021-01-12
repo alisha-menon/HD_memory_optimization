@@ -143,18 +143,17 @@ function [L1, L2, L_SAMPL_DATA_train, SAMPL_DATA_train, L_SAMPL_DATA_test, SAMPL
     train_count1 = floor(length(L5) * trainingFrac);
     train_count2 = floor(length(L6) * trainingFrac);
     
-    
+    L1 = L1(randperm(length(L1)));
     if length(L1) > train_count1
-        randomizedL1 = L1(randperm(length(L1)));
-        L1 = randomizedL1(1:train_count1);
+        L1 = L1(1:train_count1);
     elseif length(L1) < train_count1
         randomizedL3 = L3(randperm(length(L3)));
         L1 = [L1;randomizedL3(1:train_count1 - length(L1))];
     end
     
+    L2 = L2(randperm(length(L2)));
     if length(L2) > train_count2
-        randomizedL2 = L2(randperm(length(L2)));
-        L2 = randomizedL2(1:train_count2);
+        L2 = L2(1:train_count2);
     elseif length(L2) < train_count2
         randomizedL4 = L4(randperm(length(L4)));
         L2 = [L2;randomizedL4(1:train_count2 - length(L2))];

@@ -1,5 +1,5 @@
 
-function message = HD_functions_mod_reduced
+function message = HD_functions_avsubject_cim_randtt_maj
   assignin('base','genBRandomHV', @genBRandomHV); 
   assignin('base','projBRandomHV', @projBRandomHV); 
   assignin('base','initItemMemories', @initItemMemories);
@@ -45,12 +45,12 @@ function [L1, L2, L_SAMPL_DATA_train, SAMPL_DATA_train, L_SAMPL_DATA_test,SAMPL_
 	L7 = find (labels == 7);
     
     % want to select randomly of the labels to train
-    %randomizedL1 = L1(randperm(length(L1)));
-    %randomizedL2 = L2(randperm(length(L2)));
-    %L1 = randomizedL1 (1 : floor(length(randomizedL1) * trainingFrac));
-    %L2 = randomizedL2 (1 : floor(length(randomizedL2) * trainingFrac));
-    L1 = L1 (1 : floor(length(L1) * trainingFrac));
-    L2 = L2 (1 : floor(length(L2) * trainingFrac));
+    randomizedL1 = L1(randperm(length(L1)));
+    randomizedL2 = L2(randperm(length(L2)));
+    L1 = randomizedL1 (1 : floor(length(randomizedL1) * trainingFrac));
+    L2 = randomizedL2 (1 : floor(length(randomizedL2) * trainingFrac));
+    %L1 = L1 (1 : floor(length(L1) * trainingFrac));
+    %L2 = L2 (1 : floor(length(L2) * trainingFrac));
     L3 = L3 (1 : floor(length(L3) * trainingFrac));
     L4 = L4 (1 : floor(length(L4) * trainingFrac));
     L5 = L5 (1 : floor(length(L5) * trainingFrac));
@@ -370,7 +370,7 @@ function randomHV = projItemMemeory_bin (projM_pos, projM_neg, voffeature,ioffea
 
 end
 
-function v = computeNgramproj (buffer, CiM, N, precision, iM, channels,projM_pos, projM_neg, sample_index,D)
+function v = computeNgramproj (buffer, CiM, N, precision, iM, channels,sample_index,D)
 % 	DESCRIPTION: computes the N-gram
 % 	INPUTS:
 % 	buffer   :  data input
@@ -406,12 +406,14 @@ function v = computeNgramproj (buffer, CiM, N, precision, iM, channels,projM_pos
     else
         v = zeros(channels+1,D);
     end
-    chHV = projItemMemeory_bin (projM_pos, projM_neg, buffer(sample_index, 1),1,D);
+    chHV = lookupItemMemeory (CiM, buffer(sample_index, 1), precision);
+    %chHV = projItemMemeory_bin (projM_pos, projM_neg, buffer(sample_index, 1),1,D);
     chHV = xor(chHV , iM(1));
     v(1,:) = chHV;
     if channels>1    
         for i = 2 : channels
-            chHV = projItemMemeory_bin (projM_pos, projM_neg, buffer(sample_index, i), i,D);
+            %chHV = projItemMemeory_bin (projM_pos, projM_neg, buffer(sample_index, i), i,D);
+            chHV = lookupItemMemeory (CiM, buffer(sample_index, i), precision);
             chHV = xor(chHV , iM(i));
             if i == 2
                 ch2HV=chHV; 
@@ -774,7 +776,7 @@ end
 %   
 % end
 
-function [AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, trainSet3, trainSet4, trainSet5, CiM, iM1, iM2, iM3, iM4, iM5, D, N, precision, channels1, channels2, channels3, channels4, channels5, projM1_pos, projM1_neg, projM2_pos, projM2_neg, projM3_pos, projM3_neg, projM4_pos, projM4_neg, projM5_pos, projM5_neg) 
+function [AM, AM1, AM2, AM3, AM4, AM5] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, trainSet3, trainSet4, trainSet5, CiM1, CiM2, CiM3, CiM4, CiM5, iM1, iM2, iM3, iM4, iM5, D, N, precision, channels1, channels2, channels3, channels4, channels5) 
 %
 % DESCRIPTION   : train an associative memory based on input training data
 %
@@ -791,16 +793,31 @@ function [AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, tra
 %   AM          : Trained associative memory
 %   numPat      : Number of stored patterns for each class of AM
 %
- 
-	AM = containers.Map ('KeyType','double','ValueType','any');
-
+	AM = containers.Map ('KeyType','double','ValueType','any'); 
+	AM1 = containers.Map ('KeyType','double','ValueType','any');
+	AM2 = containers.Map ('KeyType','double','ValueType','any');
+	AM3 = containers.Map ('KeyType','double','ValueType','any');
+	AM4 = containers.Map ('KeyType','double','ValueType','any');
+	AM5 = containers.Map ('KeyType','double','ValueType','any');
+    
 	am_index = 0;
     for label = 1:1:max(labelTrainSet1)
     	AM (am_index) = zeros (1,D);
+    	AM1 (am_index) = zeros (1,D);
+    	AM2 (am_index) = zeros (1,D);
+    	AM3 (am_index) = zeros (1,D);
+    	AM4 (am_index) = zeros (1,D);
+    	AM5 (am_index) = zeros (1,D);
+
 	    %numPat (label) = 0;
         am_index = am_index+1;
     end
     trainVecList=zeros (length(labelTrainSet1)-N+1,D);
+    trainVecList1=zeros (length(labelTrainSet1)-N+1,D);
+    trainVecList2=zeros (length(labelTrainSet1)-N+1,D);
+    trainVecList3=zeros (length(labelTrainSet1)-N+1,D);
+    trainVecList4=zeros (length(labelTrainSet1)-N+1,D);
+    trainVecList5=zeros (length(labelTrainSet1)-N+1,D);
     %trainVecList = zeros(1,D);
     i = 1;
     label = labelTrainSet1 (1);
@@ -813,11 +830,11 @@ function [AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, tra
             %stop bundling and move onto the next sample for the next label for
             %all modalities
             %setup first Ngram
-            v1 = computeNgramproj (trainSet1 (i : i+N-1,:), CiM, N, precision, iM1, channels1,projM1_pos, projM1_neg, 1,D);
-            v2 = computeNgramproj (trainSet2 (i : i+N-1,:), CiM, N, precision, iM2, channels2,projM2_pos, projM2_neg, 1,D);
-            v3 = computeNgramproj (trainSet3 (i : i+N-1,:), CiM, N, precision, iM3, channels3,projM3_pos, projM3_neg, 1,D);
-            v4 = computeNgramproj (trainSet4 (i : i+N-1,:), CiM, N, precision, iM4, channels4,projM4_pos, projM4_neg, 1,D);
-            v5 = computeNgramproj (trainSet5 (i : i+N-1,:), CiM, N, precision, iM5, channels5,projM5_pos, projM5_neg, 1,D);
+            v1 = computeNgramproj (trainSet1 (i : i+N-1,:), CiM1, N, precision, iM1, channels1,1,D);
+            v2 = computeNgramproj (trainSet2 (i : i+N-1,:), CiM2, N, precision, iM2, channels2, 1,D);
+            v3 = computeNgramproj (trainSet3 (i : i+N-1,:), CiM3, N, precision, iM3, channels3,1,D);
+            v4 = computeNgramproj (trainSet4 (i : i+N-1,:), CiM4, N, precision, iM4, channels4,1,D);
+            v5 = computeNgramproj (trainSet5 (i : i+N-1,:), CiM5, N, precision, iM5, channels5,1,D);
             if channels1==1
                 ngram1 = v1;
             else
@@ -845,31 +862,31 @@ function [AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, tra
             end
             ngram=mode([ngram1;ngram2;ngram3;ngram4;ngram5]);
             for sample_index = 2:1:N
-                v1 = computeNgramproj (trainSet1 (i : i+N-1,:), CiM, N, precision, iM1, channels1,projM1_pos, projM1_neg, sample_index,D);
+                v1 = computeNgramproj (trainSet1 (i : i+N-1,:), CiM1, N, precision, iM1, channels1,sample_index,D);
                 if channels1==1
                     record1 = v1;          
                 else
                     record1 = mode(v1); 
                 end
-                v2 = computeNgramproj (trainSet2 (i : i+N-1,:), CiM, N, precision, iM2, channels2,projM2_pos, projM2_neg, sample_index,D);
+                v2 = computeNgramproj (trainSet2 (i : i+N-1,:), CiM2, N, precision, iM2, channels2, sample_index,D);
                 if channels2==1
                     record2 = v2;          
                 else
                     record2 = mode(v2); 
                 end
-                v3 = computeNgramproj (trainSet3 (i : i+N-1,:), CiM, N, precision, iM3, channels3,projM3_pos, projM3_neg, sample_index,D);
+                v3 = computeNgramproj (trainSet3 (i : i+N-1,:), CiM3, N, precision, iM3, channels3, sample_index,D);
                 if channels3==1
                     record3 = v3;          
                 else
                     record3 = mode(v3); 
                 end
-                v4 = computeNgramproj (trainSet4 (i : i+N-1,:), CiM, N, precision, iM4, channels4,projM4_pos, projM4_neg, sample_index,D);
+                v4 = computeNgramproj (trainSet4 (i : i+N-1,:), CiM4, N, precision, iM4, channels4, sample_index,D);
                 if channels4==1
                     record4 = v4;          
                 else
                     record4 = mode(v4); 
                 end
-                v5 = computeNgramproj (trainSet5 (i : i+N-1,:), CiM, N, precision, iM5, channels5,projM5_pos, projM5_neg, sample_index,D);
+                v5 = computeNgramproj (trainSet5 (i : i+N-1,:), CiM5, N, precision, iM5, channels5,sample_index,D);
                 if channels5==1
                     record5 = v5;          
                 else
@@ -877,13 +894,32 @@ function [AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, tra
                 end
                 record = mode([record1;record2;record3;record4;record5]);
                 circ = circshift (ngram, [1,1]);
+                circ1 = circshift (ngram1, [1,1]);
+                circ2 = circshift (ngram2, [1,1]);
+                circ3 = circshift (ngram3, [1,1]);
+                circ4 = circshift (ngram4, [1,1]);
+                circ5 = circshift (ngram5, [1,1]);
                 circ(1) = 0;
+                circ1(1) = 0;
+                circ2(1) = 0;
+                circ3(1) = 0;
+                circ4(1) = 0;
+                circ5(1) = 0;
                 ngram = xor(circ , record);
+                ngram1 = xor(circ1 , record1);
+                ngram2 = xor(circ2 , record2);
+                ngram3 = xor(circ3 , record3);
+                ngram4 = xor(circ4 , record4);
+                ngram5 = xor(circ5 , record5);
             end
                 trainVecList(i,:) = ngram;
+                trainVecList1(i,:) = ngram1;
+                trainVecList2(i,:) = ngram2;
+                trainVecList3(i,:) = ngram3;
+                trainVecList4(i,:) = ngram4;
+                trainVecList5(i,:) = ngram5;
                 count_label = count_label + 1;
                 %numPat (labelTrainSet1 (i+N-1)) = numPat (labelTrainSet1 (i+N-1)) + 1;
-
                 i = i + 1;
         else
             %once you reach the end of that label, do majority count and
@@ -891,19 +927,34 @@ function [AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, tra
             %that label, then move onto next label
             %trainVecList(1 , :) = 3;
             %label
-            if (mod(size(trainVecList((i-count_label):(i-1),1),1),2) == 1)
-                if (size(trainVecList,1) == 1)
+            if (mod(size(trainVecList1((i-count_label):(i-1),1),1),2) == 1)
+                if (size(trainVecList1,1) == 1)
                     AM(label) = trainVecList(1,:);
+                    AM1(label) = trainVecList1(1,:);
+                    AM2(label) = trainVecList2(1,:);
+                    AM3(label) = trainVecList3(1,:);
+                    AM4(label) = trainVecList4(1,:);
+                    AM5(label) = trainVecList5(1,:);
                 else
                     AM (label) = mode (trainVecList((i-count_label):(i-1),:));
+                    AM1 (label) = mode (trainVecList1((i-count_label):(i-1),:));
+                    AM2 (label) = mode (trainVecList2((i-count_label):(i-1),:));
+                    AM3 (label) = mode (trainVecList3((i-count_label):(i-1),:));
+                    AM4 (label) = mode (trainVecList4((i-count_label):(i-1),:));
+                    AM5 (label) = mode (trainVecList5((i-count_label):(i-1),:));
                 end
             else
                 %AM(label) = mode([trainVecList((i-count_label):(i-1),:); genRandomHV(D)]);
                 AM(label) = mode([trainVecList((i-count_label):(i-1),:); trainVecList((i-count_label),:)]);
+                AM1(label) = mode([trainVecList1((i-count_label):(i-1),:); trainVecList1((i-count_label),:)]);
+                AM2(label) = mode([trainVecList2((i-count_label):(i-1),:); trainVecList2((i-count_label),:)]);
+                AM3(label) = mode([trainVecList3((i-count_label):(i-1),:); trainVecList3((i-count_label),:)]);
+                AM4(label) = mode([trainVecList4((i-count_label):(i-1),:); trainVecList4((i-count_label),:)]);
+                AM5(label) = mode([trainVecList5((i-count_label):(i-1),:); trainVecList5((i-count_label),:)]);
             end
             label = labelTrainSet1(i+N-1);
             %numPat (label) = 0;
-            trainVecList=zeros (1,D);
+            %trainVecList=zeros (1,D);
             i = i+N-1;
             count_label = 0;
         end
@@ -915,24 +966,44 @@ function [AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, tra
     %wrap up the last training class
     %labelTrainSet1(l)
     %trainVecList(1 , :) = 3;
-    if (mod(size(trainVecList((i-count_label):(i-1),1),1),2) == 1)
-        if (size(trainVecList,1) == 1)
+    if (mod(size(trainVecList1((i-count_label):(i-1),1),1),2) == 1)
+        if (size(trainVecList1,1) == 1)
             AM(label) = trainVecList(1,:);
+            AM1(label) = trainVecList1(1,:);
+            AM2(label) = trainVecList2(1,:);
+            AM3(label) = trainVecList3(1,:);
+            AM4(label) = trainVecList4(1,:);
+            AM5(label) = trainVecList5(1,:);
         else
             AM (label) = mode (trainVecList((i-count_label):(i-1),:));
+            AM1 (label) = mode (trainVecList1((i-count_label):(i-1),:));
+            AM2 (label) = mode (trainVecList2((i-count_label):(i-1),:));
+            AM3 (label) = mode (trainVecList3((i-count_label):(i-1),:));
+            AM4 (label) = mode (trainVecList4((i-count_label):(i-1),:));
+            AM5 (label) = mode (trainVecList5((i-count_label):(i-1),:));
         end
     else
         %AM(label) = mode([trainVecList((i-count_label):(i-1),:); genRandomHV(D)]);
         AM(label) = mode([trainVecList((i-count_label):(i-1),:); trainVecList((i-count_label),:)]);
+        AM1(label) = mode([trainVecList1((i-count_label):(i-1),:); trainVecList1((i-count_label),:)]);
+        AM2(label) = mode([trainVecList2((i-count_label):(i-1),:); trainVecList2((i-count_label),:)]);
+        AM3(label) = mode([trainVecList3((i-count_label):(i-1),:); trainVecList3((i-count_label),:)]);
+        AM4(label) = mode([trainVecList4((i-count_label):(i-1),:); trainVecList4((i-count_label),:)]);
+        AM5(label) = mode([trainVecList5((i-count_label):(i-1),:); trainVecList5((i-count_label),:)]);
     end
     am_index = 0;
     for label = 1:1:classes
 		fprintf ('Class = %d \t sum = %.0f \t created \n', label, sum(AM(am_index)));
+		fprintf ('Class = %d \t sum = %.0f \t created \n', label, sum(AM1(am_index)));
+		fprintf ('Class = %d \t sum = %.0f \t created \n', label, sum(AM2(am_index)));
+		fprintf ('Class = %d \t sum = %.0f \t created \n', label, sum(AM3(am_index)));
+		fprintf ('Class = %d \t sum = %.0f \t created \n', label, sum(AM4(am_index)));
+		fprintf ('Class = %d \t sum = %.0f \t created \n', label, sum(AM5(am_index)));
         am_index = am_index + 1;
     end
 end
 
-function [accexc_alltrz, accExcTrnz, accuracy, predicLabel, actualLabel, all_error, tranzError] = hdcpredictproj (labelTestSet1, testSet1, testSet2, testSet3, testSet4, testSet5 , AM, CiM, iM1, iM2, iM3, iM4, iM5, D, N, precision, classes, channels1, channels2, channels3, channels4, channels5, projM1_pos, projM1_neg, projM2_pos, projM2_neg, projM3_pos, projM3_neg, projM4_pos, projM4_neg, projM5_pos, projM5_neg) 
+function [accexc_alltrz, accexc_alltrz_mod1, accexc_alltrz_mod2, accexc_alltrz_mod3, accexc_alltrz_mod4, accexc_alltrz_mod5, accexc_alltrz_majcount, accExcTrnz, accExcTrnz_mod1, accExcTrnz_mod2, accExcTrnz_mod3, accExcTrnz_mod4, accExcTrnz_mod5, accExcTrnz_majcount, accuracy, accuracy_mod1, accuracy_mod2, accuracy_mod3, accuracy_mod4, accuracy_mod5, accuracy_majcount, predicLabel, actualLabel] = hdcpredictproj (labelTestSet1, testSet1, testSet2, testSet3, testSet4, testSet5 , AM,AM1, AM2, AM3, AM4, AM5, CiM1, CiM2, CiM3, CiM4, CiM5, iM1, iM2, iM3, iM4, iM5, D, N, precision, classes, channels1, channels2, channels3, channels4, channels5) 
 %
 % DESCRIPTION   : test accuracy based on input testing data
 %
@@ -950,24 +1021,49 @@ function [accexc_alltrz, accExcTrnz, accuracy, predicLabel, actualLabel, all_err
 %   accuracy    : classification accuracy for all situations
 %   accExcTrnz  : classification accuracy excluding the transitions between gestutes
 %
-	correct = 0;
+
     numTests = 0;
-	tranzError = 0;
-	all_error = 0;
+	correct = 0;
+    tranzError = 0;
+	correct1 = 0;
+    tranzError1 = 0;
+	correct2 = 0;
+    tranzError2 = 0;
+	correct3 = 0;
+    tranzError3 = 0;
+	correct4 = 0;
+    tranzError4 = 0;
+ 	correct5 = 0;
+    tranzError5 = 0;
+	correct_comb = 0;
+    tranzError_comb = 0;
+    all_error = 0;
     %second_error_all=0;
     %label_am = 0;
+    correctex1 = 0;
+    numtestex1 = 0;
+    correctex2 = 0;
+    numtestex2 = 0;
+    correctex3 = 0;
+    numtestex3 = 0;
+    correctex4 = 0;
+    numtestex4 = 0;
+    correctex5 = 0;
+    numtestex5 = 0;
     correctex = 0;
     numtestex = 0;
+    correctex_comb = 0;
+    numtestex_comb = 0;
    
     for i = 1:1:size(testSet1,1)-N+1        
 		numTests = numTests + 1;
 		actualLabel(i : i+N-1,:) = mode(labelTestSet1 (i : i+N-1));
         %% setup first Ngram for all modalities
-        v1 = computeNgramproj (testSet1 (i : i+N-1,:), CiM, N, precision, iM1, channels1,projM1_pos, projM1_neg,1,D);
-        v2 = computeNgramproj (testSet2 (i : i+N-1,:), CiM, N, precision, iM2, channels2,projM2_pos, projM2_neg,1,D);
-        v3 = computeNgramproj (testSet3 (i : i+N-1,:), CiM, N, precision, iM3, channels3,projM3_pos, projM3_neg,1,D);
-        v4 = computeNgramproj (testSet4 (i : i+N-1,:), CiM, N, precision, iM4, channels4,projM4_pos, projM4_neg, 1,D);
-        v5 = computeNgramproj (testSet5 (i : i+N-1,:), CiM, N, precision, iM5, channels5,projM5_pos, projM5_neg, 1,D);
+        v1 = computeNgramproj (testSet1 (i : i+N-1,:), CiM1, N, precision, iM1, channels1,1,D);
+        v2 = computeNgramproj (testSet2 (i : i+N-1,:), CiM2, N, precision, iM2, channels2,1,D);
+        v3 = computeNgramproj (testSet3 (i : i+N-1,:), CiM3, N, precision, iM3, channels3,1,D);
+        v4 = computeNgramproj (testSet4 (i : i+N-1,:), CiM4, N, precision, iM4, channels4,1,D);
+        v5 = computeNgramproj (testSet5 (i : i+N-1,:), CiM5, N, precision, iM5, channels5,1,D);
         
         if channels1==1
             sigHV1 = v1;
@@ -998,31 +1094,31 @@ function [accexc_alltrz, accExcTrnz, accuracy, predicLabel, actualLabel, all_err
         sigHV=mode([sigHV1;sigHV2;sigHV3;sigHV4;sigHV5]);
         %% setup spatial encoder outputs for all channels for all modalities N-1 samples
         for sample_index = 2:1:N
-            v1 = computeNgramproj (testSet1 (i : i+N-1,:), CiM, N, precision, iM1, channels1,projM1_pos, projM1_neg, sample_index,D);
+            v1 = computeNgramproj (testSet1 (i : i+N-1,:), CiM1, N, precision, iM1, channels1, sample_index,D);
             if channels1==1
                 record1 = v1;          
             else
                 record1 = mode(v1); 
             end
-            v2 = computeNgramproj (testSet2 (i : i+N-1,:), CiM, N, precision, iM2, channels2,projM2_pos, projM2_neg, sample_index,D);
+            v2 = computeNgramproj (testSet2 (i : i+N-1,:), CiM2, N, precision, iM2, channels2, sample_index,D);
             if channels2==1
                 record2 = v2;          
             else
                 record2 = mode(v2); 
             end
-            v3 = computeNgramproj (testSet3 (i : i+N-1,:), CiM, N, precision, iM3, channels3,projM3_pos, projM3_neg, sample_index,D);
+            v3 = computeNgramproj (testSet3 (i : i+N-1,:), CiM3, N, precision, iM3, channels3, sample_index,D);
             if channels3==1
                 record3 = v3;          
             else
                 record3 = mode(v3); 
             end
-            v4 = computeNgramproj (testSet4 (i : i+N-1,:), CiM, N, precision, iM4, channels4,projM4_pos, projM4_neg, sample_index,D);
+            v4 = computeNgramproj (testSet4 (i : i+N-1,:), CiM4, N, precision, iM4, channels4, sample_index,D);
             if channels4==1
                 record4 = v4;          
             else
                 record4 = mode(v4); 
             end
-            v5 = computeNgramproj (testSet5 (i : i+N-1,:), CiM, N, precision, iM5, channels5,projM5_pos, projM5_neg, sample_index,D);
+            v5 = computeNgramproj (testSet5 (i : i+N-1,:), CiM5, N, precision, iM5, channels5, sample_index,D);
             if channels5==1
                 record5 = v5;          
             else
@@ -1032,13 +1128,33 @@ function [accexc_alltrz, accExcTrnz, accuracy, predicLabel, actualLabel, all_err
             record = mode([record1;record2;record3;record4;record5]);
             % bundle
             circ = circshift (sigHV, [1,1]);
+            circ1 = circshift (sigHV1, [1,1]);
+            circ2 = circshift (sigHV2, [1,1]);
+            circ3 = circshift (sigHV3, [1,1]);
+            circ4 = circshift (sigHV4, [1,1]);
+            circ5 = circshift (sigHV5, [1,1]);
             circ(1) = 0;
             sigHV = xor(circ , record);
+            sigHV1 = xor(circ1 , record1);
+            sigHV2 = xor(circ2 , record2);
+            sigHV3 = xor(circ3 , record3);
+            sigHV4 = xor(circ4 , record4);
+            sigHV5 = xor(circ5 , record5);
             %sigHV = xor(circshift (sigHV, [1,1]) , record);
         end
    
 	    [predict_hamm, ~, ~] = hamming(sigHV, AM, classes);
+	    [predict_hamm1, ~, ~] = hamming(sigHV1, AM1, classes);
+	    [predict_hamm2, ~, ~] = hamming(sigHV2, AM2, classes);
+	    [predict_hamm3, ~, ~] = hamming(sigHV3, AM3, classes);
+	    [predict_hamm4, ~, ~] = hamming(sigHV4, AM4, classes);
+	    [predict_hamm5, ~, ~] = hamming(sigHV5, AM5, classes);
         predicLabel(i : i+N-1) = predict_hamm;
+        predicLabel1(i : i+N-1) = predict_hamm1;
+        predicLabel2(i : i+N-1) = predict_hamm2;
+        predicLabel3(i : i+N-1) = predict_hamm3;
+        predicLabel4(i : i+N-1) = predict_hamm4;
+        predicLabel5(i : i+N-1) = predict_hamm5;
         %all_error = [all_error error]; %#ok<AGROW>
         %second_error_all = [second_error_all second_error]; %#ok<AGROW>
         if predict_hamm == actualLabel(i)
@@ -1047,18 +1163,117 @@ function [accexc_alltrz, accExcTrnz, accuracy, predicLabel, actualLabel, all_err
 			tranzError = tranzError + 1;
         end
         
+        if predict_hamm1 == actualLabel(i)
+			correct1 = correct1 + 1;
+        elseif labelTestSet1 (i) ~= labelTestSet1(i+N-1)
+			tranzError1 = tranzError1 + 1;
+        end
+
+        if predict_hamm2 == actualLabel(i)
+			correct2 = correct2 + 1;
+        elseif labelTestSet1 (i) ~= labelTestSet1(i+N-1)
+			tranzError2 = tranzError2 + 1;
+        end
+        
+        if predict_hamm3 == actualLabel(i)
+			correct3 = correct3 + 1;
+        elseif labelTestSet1 (i) ~= labelTestSet1(i+N-1)
+			tranzError3 = tranzError3 + 1;
+        end
+        
+        if predict_hamm4 == actualLabel(i)
+			correct4 = correct4 + 1;
+        elseif labelTestSet1 (i) ~= labelTestSet1(i+N-1)
+			tranzError4 = tranzError4 + 1;
+        end        
+        
+        if predict_hamm5 == actualLabel(i)
+			correct5 = correct5 + 1;
+        elseif labelTestSet1 (i) ~= labelTestSet1(i+N-1)
+			tranzError5 = tranzError5 + 1;
+        end
+        
+        comb_predict = mode([predict_hamm1, predict_hamm2, predict_hamm3, predict_hamm4, predict_hamm5]); 
+        
+        if comb_predict == actualLabel(i)
+			correct_comb = correct_comb + 1;
+        elseif labelTestSet1 (i) ~= labelTestSet1(i+N-1)
+			tranzError_comb = tranzError_comb + 1;
+        end
+        
         if (labelTestSet1 (i) == labelTestSet1(i+N-1))
             if predict_hamm == actualLabel(i)
                 correctex = correctex+1;
             end
             numtestex = numtestex + 1;
         end
+        
+        if (labelTestSet1 (i) == labelTestSet1(i+N-1))
+            if predict_hamm1 == actualLabel(i)
+                correctex1 = correctex1+1;
+            end
+            numtestex1 = numtestex1 + 1;
+        end
+        
+        if (labelTestSet1 (i) == labelTestSet1(i+N-1))
+            if predict_hamm2 == actualLabel(i)
+                correctex2 = correctex2+1;
+            end
+            numtestex2 = numtestex2 + 1;
+        end        
+        
+        if (labelTestSet1 (i) == labelTestSet1(i+N-1))
+            if predict_hamm3 == actualLabel(i)
+                correctex3 = correctex3+1;
+            end
+            numtestex3 = numtestex3 + 1;
+        end
+        
+        if (labelTestSet1 (i) == labelTestSet1(i+N-1))
+            if predict_hamm4 == actualLabel(i)
+                correctex4 = correctex4+1;
+            end
+            numtestex4 = numtestex4 + 1;
+        end    
+        
+        if (labelTestSet1 (i) == labelTestSet1(i+N-1))
+            if predict_hamm5 == actualLabel(i)
+                correctex5 = correctex5+1;
+            end
+            numtestex5 = numtestex5 + 1;
+        end        
+        
+        if (labelTestSet1 (i) == labelTestSet1(i+N-1))
+            if comb_predict == actualLabel(i)
+                correctex_comb = correctex_comb+1;
+            end
+            numtestex_comb = numtestex_comb + 1;
+        end        
+        
     end
     
     accuracy = correct / numTests;
+    accuracy_mod1 = correct1 / numTests;
+    accuracy_mod2 = correct2 / numTests;
+    accuracy_mod3 = correct3 / numTests;
+    accuracy_mod4 = correct4 / numTests;
+    accuracy_mod5 = correct5 / numTests;
+    accuracy_majcount = correct_comb / numTests;
     %accExcTrnz = (correct + tranzError) / numTests;
     accExcTrnz = correct / (numTests-tranzError);
+    accExcTrnz_mod1 = correct1 / (numTests-tranzError1);
+    accExcTrnz_mod2 = correct2 / (numTests-tranzError2);
+    accExcTrnz_mod3 = correct3 / (numTests-tranzError3);
+    accExcTrnz_mod4 = correct4 / (numTests-tranzError4);
+    accExcTrnz_mod5 = correct5 / (numTests-tranzError5);
+    accExcTrnz_majcount = correct_comb / (numTests-tranzError_comb);
     accexc_alltrz = correctex/numtestex;
+    accexc_alltrz_mod1 = correctex1/numtestex;
+    accexc_alltrz_mod2 = correctex2/numtestex;
+    accexc_alltrz_mod3 = correctex3/numtestex;
+    accexc_alltrz_mod4 = correctex4/numtestex;
+    accexc_alltrz_mod5 = correctex5/numtestex;
+    accexc_alltrz_majcount = correctex_comb/numtestex;
   
 end
 function [predict_hamm, error, second_error] = hamming (q, aM, classes)

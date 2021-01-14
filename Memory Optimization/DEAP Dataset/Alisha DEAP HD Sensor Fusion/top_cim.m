@@ -71,7 +71,7 @@ while (randCounter>0)
     
     %if rule30, add randCounter parameter
     
-    [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, chAM1, chAM3, chAM5, chAM7, chAM9] = rule_30(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, initItemMemories,genRandomHV, randCounter);
+    [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, chAM1, chAM3, chAM5, chAM7, chAM9] = regular(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, initItemMemories,genRandomHV, randCounter);
     
     for subject = 1:1:subjects
         subject

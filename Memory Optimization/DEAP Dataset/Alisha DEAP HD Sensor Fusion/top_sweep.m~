@@ -29,10 +29,10 @@ end
 %%
 randCounter= 10; %per subject
 full_count = randCounter;
-learningrate=[0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]; % percentage of the dataset used to train the algorithm
+learningrate=[0.3, 0.4, 0.5, 0.6, 0.7]; % percentage of the dataset used to train the algorithm
 downSampRate = 1;
-ngram = 1; % for temporal encode
-subjects = 32;
+ngram = 2; % for temporal encode
+subjects = 1;
 % D_full = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]; %dimension of the hypervectors
 D_full = [10000];
 maxL = 2; % for CiM

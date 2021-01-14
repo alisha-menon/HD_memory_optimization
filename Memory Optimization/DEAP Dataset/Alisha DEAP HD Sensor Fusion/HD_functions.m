@@ -918,7 +918,7 @@ function [AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, tra
                 end
             else
                 if (size(trainVecList((i-count_label):(i-1),1),1) == 0)
-                    AM(label) = genrandomHV(D);
+                    AM(label) = genRandomHV(D);
                 end
                 %AM(label) = mode([trainVecList((i-count_label):(i-1),:); genRandomHV(D)]);
                 AM(label) = mode([trainVecList((i-count_label):(i-1),:); trainVecList((i-count_label),:)]);
@@ -945,7 +945,7 @@ function [AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, tra
         end
     else
         if (size(trainVecList((i-count_label):(i-1),1),1) == 0)
-            AM(label) = genrandomHV(D);
+            AM(label) = genRandomHV(D);
         end
         %AM(label) = mode([trainVecList((i-count_label):(i-1),:); genRandomHV(D)]);
         AM(label) = mode([trainVecList((i-count_label):(i-1),:); trainVecList((i-count_label),:)]);

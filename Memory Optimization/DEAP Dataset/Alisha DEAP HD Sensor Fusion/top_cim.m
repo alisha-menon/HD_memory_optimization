@@ -27,12 +27,12 @@ else
 end
 
 %%
-randCounter= 10; %per subject
+randCounter= 5; %per subject
 full_count = randCounter;
 learningrate=0.5; % percentage of the dataset used to train the algorithm
 downSampRate = 1;
 ngram = 3; % for temporal encode
-subjects = 32;
+subjects = 2;
 % D_full = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]; %dimension of the hypervectors
 D_full = [10000];
 maxL = 10; % for CiM
@@ -69,7 +69,9 @@ learningFrac = learningrate(1);
 while (randCounter>0)
     rng('shuffle');
     
-    [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, chAM1, chAM3, chAM5, chAM7, chAM9] = regular(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, initItemMemories,genRandomHV);
+    %if rule30, add randCounter parameter
+    
+    [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, chAM1, chAM3, chAM5, chAM7, chAM9] = rule_30(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, initItemMemories,genRandomHV, randCounter);
     
     for subject = 1:1:subjects
         subject
@@ -478,9 +480,14 @@ function [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, chAM1, chAM3, chAM5, chAM7, 
     
 end
 
-function [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, chAM1, chAM3, chAM5, chAM7, chAM9] = rule_30(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, initItemMemories)
+function [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, chAM1, chAM3, chAM5, chAM7, chAM9] = rule_30(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, initItemMemories, genRandomHV, randCounter)
 % NEED TO MODIFY FOR CIM    
-[chAM8, iMch8] = initItemMemories (D, maxL, channels_v_EXG);
+    [chAM1, iMch1] = initItemMemories (D, maxL, channels_v);
+    [chAM3, iMch3] = initItemMemories (D, maxL, channels_v_EEG);
+    [chAM5, iMch5] = initItemMemories (D, maxL, channels_v_GSR);
+    [chAM7, iMch7] = initItemMemories (D, maxL, channels_v_BVP);
+    [chAM9, iMch9] = initItemMemories (D, maxL, channels_v_RES);
+    [chAM8, iMch8] = initItemMemories (D, maxL, channels_v_EXG);
     
     iMch1 = zeros(channels_v, D);
     projM1_pos = zeros(channels_v, D);
@@ -580,13 +587,14 @@ function [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, chAM1, chAM3, chAM5, chAM7, 
     end
 end
 
-function [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, chAM1, chAM3, chAM5, chAM7, chAM9] = rule_90(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, initItemMemories,genRandomHV)    [chAM8, iMch8] = initItemMemories (D, maxL, channels_v_EXG);
+function [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, chAM1, chAM3, chAM5, chAM7, chAM9] = rule_90(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, initItemMemories,genRandomHV)    
+    [chAM8, iMch8] = initItemMemories (D, maxL, channels_v_EXG);
     [chAM1, iMch1] = initItemMemories (D, maxL, channels_v);
     [chAM3, iMch3] = initItemMemories (D, maxL, channels_v_EEG);
     [chAM5, iMch5] = initItemMemories (D, maxL, channels_v_GSR);
     [chAM7, iMch7] = initItemMemories (D, maxL, channels_v_BVP);
     [chAM9, iMch9] = initItemMemories (D, maxL, channels_v_RES);
-    [chAM8, ~] = initItemMemories (D, maxL, channels_v_EXG);
+    %[chAM8, ~] = initItemMemories (D, maxL, channels_v_EXG);
     
     combinations_necessary = max([channels_v_EEG, channels_v_GSR, channels_v, channels_v_BVP, channels_v_RES]);
     total_vectors = combinations_necessary;
@@ -621,5 +629,45 @@ function [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, chAM1, chAM3, chAM5, chAM7, 
     for i = 1:1:channels_v
         %randVs = randperm(total_vectors);
         iMch1(i) = randSetVectors(i);
+    end
+end
+
+
+function vec_array = arrange_vectors(m)
+    vec_array = [];
+    m_copy = m;
+    if (mod(length(m_copy), 2)== 1)
+        m_copy(end) = []; 
+    end
+    while (length(m_copy) > 2)
+        last = m_copy(end);
+        m_copy(end) = [];   
+        last2 = m_copy(end);
+        m_copy(end) = [];
+        arr = [last, last2];
+        vec_array = [vec_array; [m_copy(1,1), arr]];
+    end
+    
+end
+
+%uses arrange_vectors on a list of vectors
+function complete_array = final_arrange(m)
+    complete_array = [];
+    while (length(m)>2)
+        complete_array = [complete_array; arrange_vectors(m)];
+        m(1) = [];
+    end
+end
+
+
+
+%given a number of vectors, counts all combinations
+function num_vectors = vector_counter(x)
+num_vectors = 0;    
+subtracter = 1;
+    while (subtracter < (x-1))
+        num_vectors = num_vectors + floor((x-subtracter)/2);
+        subtracter = subtracter + 1;
+    
     end
 end

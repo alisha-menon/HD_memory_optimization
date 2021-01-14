@@ -68,9 +68,7 @@ q=0.7;
 learningFrac = learningrate(1); 
 while (randCounter>0)
     rng('shuffle');
-    
-    %if rule30, add randCounter parameter
-    
+        
     [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, chAM1, chAM3, chAM5, chAM7, chAM9] = regular(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, initItemMemories,genRandomHV, randCounter);
     
     for subject = 1:1:subjects
@@ -218,8 +216,8 @@ while (randCounter>0)
         % the selected data for training. The label dataset is in order from 1-7
         % and the data is also stacked one by one so that it is in order from 1-7
 
-        [L1_1, L2_1, L_SAMPL_DATA_01_train, SAMPL_DATA_01_train, L_SAMPL_DATA_01_test, SAMPL_DATA_01_test] = genTrainTestData (TS_COMPLETE_01, L_TS_COMPLETE_01, learningFrac, 'inorder');
-        [L1_2, L2_2, L_SAMPL_DATA_02_train, SAMPL_DATA_02_train, L_SAMPL_DATA_02_test, SAMPL_DATA_02_test] = genTrainTestData (TS_COMPLETE_02, L_TS_COMPLETE_02, learningFrac, 'inorder');
+        [L1_1, L2_1, L_SAMPL_DATA_01_train, SAMPL_DATA_01_train, L_SAMPL_DATA_01_test, SAMPL_DATA_01_test] = genTrainTestData (TS_COMPLETE_01, L_TS_COMPLETE_01, learningFrac, 'inorder',N);
+        [L1_2, L2_2, L_SAMPL_DATA_02_train, SAMPL_DATA_02_train, L_SAMPL_DATA_02_test, SAMPL_DATA_02_test] = genTrainTestData (TS_COMPLETE_02, L_TS_COMPLETE_02, learningFrac, 'inorder',N);
         [SAMPL_DATA_11_train, SAMPL_DATA_11_test] = select_traintest(L1_1, L2_1, TS_COMPLETE_11);
         [SAMPL_DATA_12_train, SAMPL_DATA_12_test] = select_traintest(L1_2, L2_2, TS_COMPLETE_12);
         [SAMPL_DATA_21_train, SAMPL_DATA_21_test] = select_traintest(L1_1, L2_1, TS_COMPLETE_21);
@@ -480,43 +478,27 @@ function [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, chAM1, chAM3, chAM5, chAM7, 
     
 end
 
-function [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, chAM1, chAM3, chAM5, chAM7, chAM9] = rule_30(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, initItemMemories, genRandomHV, randCounter)
-% NEED TO MODIFY FOR CIM    
+function [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, chAM1, chAM3, chAM5, chAM7, chAM9] = rule_30(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, initItemMemories, genRandomHV)
     [chAM1, iMch1] = initItemMemories (D, maxL, channels_v);
     [chAM3, iMch3] = initItemMemories (D, maxL, channels_v_EEG);
     [chAM5, iMch5] = initItemMemories (D, maxL, channels_v_GSR);
     [chAM7, iMch7] = initItemMemories (D, maxL, channels_v_BVP);
     [chAM9, iMch9] = initItemMemories (D, maxL, channels_v_RES);
-    [chAM8, iMch8] = initItemMemories (D, maxL, channels_v_EXG);
+    [chAM8, ~] = initItemMemories (D, maxL, channels_v_EXG);
+
     
-    iMch1 = zeros(channels_v, D);
-    projM1_pos = zeros(channels_v, D);
-    projM1_neg = zeros(channels_v, D);
-
-    iMch3 = zeros(channels_v_EEG, D);
-    projM3_pos = zeros(channels_v_EEG, D);
-    projM3_neg = zeros(channels_v_EEG, D);
-
-    iMch5 = zeros(channels_v_GSR, D);
-    projM5_pos = zeros(channels_v_GSR, D);
-    projM5_neg = zeros(channels_v_GSR, D);
-
-    iMch7 = zeros(channels_v_BVP, D);
-    projM7_pos = zeros(channels_v_BVP, D);
-    projM7_neg = zeros(channels_v_BVP, D);
-
-    iMch9 = zeros(channels_v_RES, D);
-    projM9_pos = zeros(channels_v_RES, D);
-    projM9_neg = zeros(channels_v_RES, D);
     
     combinations_necessary = max([channels_v_EEG, channels_v_GSR, channels_v, channels_v_BVP, channels_v_RES]);
+    
     outputs = 0;
-    total_vectors = 0;
+    total_vectors = combinations_necessary;
 
-    while (outputs < combinations_necessary)
-        outputs = vector_counter(total_vectors);
-        total_vectors = total_vectors + 1;
-    end
+%     while (outputs < combinations_necessary)
+%         outputs = vector_counter(total_vectors);
+%         total_vectors = total_vectors + 1;
+%     end
+%     
+    
     
     rule = 30;
     neighborhood_size = 3;
@@ -526,6 +508,9 @@ function [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, chAM1, chAM3, chAM5, chAM7, 
     offset = floor(neighborhood_size/2);
     ruleset = fliplr(dec2bin(rule,2^neighborhood_size));
     randSetVectors  = containers.Map ('KeyType','double','ValueType','any');
+    
+    
+    
     for i = 1:total_vectors
         new_vector = zeros(1,D);
         for d = 1:D
@@ -542,49 +527,32 @@ function [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, chAM1, chAM3, chAM5, chAM7, 
         seed_vector = new_vector;
         randSetVectors(i) = seed_vector;
     end
-    
-    combinations = final_arrange(values(randSetVectors));
-    [s1,s2] = size(combinations);
-
-    c = randCounter;
-    while (c>0)
-        randints = randi([1,s1],1,combinations_necessary);
-        c = c-1;
-    end
 
     for i = 1:1:channels_v_RES
-        iMch9(i,:) = combinations{randints(i),1};
-        projM9_pos(i,:) = combinations{randints(i),2};
-        projM9_neg(i,:) = combinations{randints(i),3};
+        %randVs = randperm(total_vectors);
+        iMch9(i) = randSetVectors(i);
     end
-        randints = randi([1,s1],1,combinations_necessary);
 
     for i = 1:1:channels_v_BVP
-        iMch7(i,:) = combinations{randints(i),1};
-        projM7_pos(i,:) = combinations{randints(i),2};
-        projM7_neg(i,:) = combinations{randints(i),3};
+        %randVs = randperm(total_vectors);
+        iMch7(i) = randSetVectors(i);
     end
-        randints = randi([1,s1],1,combinations_necessary);
 
     for i = 1:1:channels_v_GSR
-        iMch5(i,:) = combinations{randints(i),1};
-        projM5_pos(i,:) = combinations{randints(i),2};
-        projM5_neg(i,:) = combinations{randints(i),3};
+        %randVs = randperm(total_vectors);
+        iMch5(i) = randSetVectors(i);
     end
-        randints = randi([1,s1],1,combinations_necessary);
+    
+    for i = 1:1:channels_v_EEG
+        %randVs = randperm(total_vectors);
+        iMch3(i) = randSetVectors(i);
+    end
+    
+    for i = 1:1:channels_v
+        %randVs = randperm(total_vectors);
+        iMch1(i) = randSetVectors(i);
+    end
 
-    for i=1:1:channels_v_EEG
-        iMch3(i,:) = combinations{randints(i),1};
-        projM3_pos(i,:) = combinations{randints(i),2};
-        projM3_neg(i,:) = combinations{randints(i),3};
-    end
-        randints = randi([1,s1],1,combinations_necessary);
-
-    for i=1:1:channels_v
-        iMch1(i,:) = combinations{randints(i),1};
-        projM1_pos(i,:) = combinations{randints(i),2};
-        projM1_neg(i,:) = combinations{randints(i),3};
-    end
 end
 
 function [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, chAM1, chAM3, chAM5, chAM7, chAM9] = rule_90(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, initItemMemories,genRandomHV)    

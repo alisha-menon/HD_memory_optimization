@@ -29,10 +29,10 @@ end
 %%
 randCounter= 10; %per subject
 full_count = randCounter;
-learningrate=[0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]; % percentage of the dataset used to train the algorithm
+learningrate=[0.7]; % percentage of the dataset used to train the algorithm
 downSampRate = 1;
-ngram = 1; % for temporal encode
-subjects = 32;
+ngram = 2; % for temporal encode
+subjects = 13;
 % D_full = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]; %dimension of the hypervectors
 D_full = [10000];
 maxL = 2; % for CiM
@@ -75,7 +75,7 @@ for learn_count = 1:1:length(learningrate)
 
         [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, projM1_pos, projM1_neg, projM3_pos, projM3_neg, projM5_pos, projM5_neg, projM7_pos, projM7_neg, projM9_pos, projM9_neg] = regular(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, q, initItemMemories, genRandomHV, projBRandomHV, randCounter);
 
-        for subject = 1:1:subjects
+        for subject = 13:1:subjects
             subject
             features=inputs((subject-1)*40+1:subject*40,:);
             f_label_a_binary=features(:,239);
@@ -228,8 +228,8 @@ for learn_count = 1:1:length(learningrate)
             % the selected data for training. The label dataset is in order from 1-7
             % and the data is also stacked one by one so that it is in order from 1-7
 
-            [L1_1, L2_1, L_SAMPL_DATA_01_train, SAMPL_DATA_01_train, L_SAMPL_DATA_01_test, SAMPL_DATA_01_test] = genTrainTestData (TS_COMPLETE_01, L_TS_COMPLETE_01, learningFrac, 'inorder');
-            [L1_2, L2_2, L_SAMPL_DATA_02_train, SAMPL_DATA_02_train, L_SAMPL_DATA_02_test, SAMPL_DATA_02_test] = genTrainTestData (TS_COMPLETE_02, L_TS_COMPLETE_02, learningFrac, 'inorder');
+            [L1_1, L2_1, L_SAMPL_DATA_01_train, SAMPL_DATA_01_train, L_SAMPL_DATA_01_test, SAMPL_DATA_01_test] = genTrainTestData (TS_COMPLETE_01, L_TS_COMPLETE_01, learningFrac, 'inorder',N);
+            [L1_2, L2_2, L_SAMPL_DATA_02_train, SAMPL_DATA_02_train, L_SAMPL_DATA_02_test, SAMPL_DATA_02_test] = genTrainTestData (TS_COMPLETE_02, L_TS_COMPLETE_02, learningFrac, 'inorder',N);
             [SAMPL_DATA_11_train, SAMPL_DATA_11_test] = select_traintest(L1_1, L2_1, TS_COMPLETE_11);
             [SAMPL_DATA_12_train, SAMPL_DATA_12_test] = select_traintest(L1_2, L2_2, TS_COMPLETE_12);
             [SAMPL_DATA_21_train, SAMPL_DATA_21_test] = select_traintest(L1_1, L2_1, TS_COMPLETE_21);

@@ -27,16 +27,16 @@ else
 end
 
 %%
-randCounter= 5; %per subject
+randCounter= 10; %per subject
 full_count = randCounter;
 learningrate=0.5; % percentage of the dataset used to train the algorithm
 downSampRate = 1;
 ngram = 3; % for temporal encode
-subjects = 2;
+subjects = 32;
 % D_full = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]; %dimension of the hypervectors
 D_full = [10000];
 maxL = 10; % for CiM
-N = ngram;
+N = ngram;  
 precision = 10; % for CiM
 %====Features and Label===
 load('DEAP_data.mat')

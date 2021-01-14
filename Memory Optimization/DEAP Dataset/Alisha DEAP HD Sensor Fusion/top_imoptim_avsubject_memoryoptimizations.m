@@ -21,7 +21,7 @@ clear;
 % select = 2 for late fusion
 select = 1;
 if (select == 1)
-    HD_functions_cim_unoptimized;     % load HD functions
+    HD_functions_mod_reduced_new;     % load HD functions
 else 
     HD_functions_multiplex;
 end
@@ -35,9 +35,9 @@ ngram = 3; % for temporal encode
 subjects = 32;
 % D_full = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]; %dimension of the hypervectors
 D_full = [10000];
-maxL = 10; % for CiM
+maxL = 2; % for CiM
 N = ngram;
-precision = 10; % for CiM
+precision = 20; % for CiM
 %====Features and Label===
 load('DEAP_data.mat')
 features=inputs(:,:);
@@ -69,8 +69,8 @@ learningFrac = learningrate(1);
 while (randCounter>0)
     rng('shuffle');
     
-    [iMch1, iMch3, iMch5, iMch7, iMch9, iMch8, chAM1, chAM3, chAM5, chAM7, chAM9, chAM8] = rule_90(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, initItemMemories, genRandomHV);
-
+    [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, projM1_pos, projM1_neg, projM3_pos, projM3_neg, projM5_pos, projM5_neg, projM7_pos, projM7_neg, projM9_pos, projM9_neg] = regular(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, q, initItemMemories, genRandomHV, projBRandomHV, randCounter);
+    
     for subject = 1:1:subjects
         subject
         features=inputs((subject-1)*40+1:subject*40,:);
@@ -78,17 +78,6 @@ while (randCounter>0)
         f_label_v_binary=features(:,240);
 
         m = 5;
-
-        % f_label = f_label_a_binary;
-        % f_label(f_label <= 3) = 1;
-        % f_label(f_label >= 7) = 2;
-        % f_label_ind = f_label <=2;
-        % size = sum(f_label_ind);
-        % 
-        % f_label_a_binary = f_label(f_label <=2);
-        % f_label_v_binary = f_label(f_label <=2);
-        % f_label_d_binary = f_label(f_label <=2);
-        % f_label_l_binary = f_label(f_label <=2);
 
 
         f_label_a_binary(f_label_a_binary < m) = 1;
@@ -104,13 +93,13 @@ while (randCounter>0)
          features(:,k)=features(:,k)/max(features(:,k));
         end
 
-%         for i=1:238
-%          features(:,i)=2*features(:,i)-1;
-%         end
-% 
-%         for i=1:238
-%          features(:,i)=features(:,i)+0.35;
-%         end
+        for i=1:238
+         features(:,i)=2*features(:,i)-1;
+        end
+
+        for i=1:238
+         features(:,i)=features(:,i)+0.35;
+        end
 
         features_EMG=features(:,1:10);
         features_EEG=features(:,11:202);
@@ -142,7 +131,6 @@ while (randCounter>0)
         classes = 2; % level of classes
         channels_a_EXG=channels_a+channels_a_EEG+channels_a_GSR+channels_a_BVP+channels_a_RES;
 
- 
         %downsample the dataset using the value contained in the variable "downSampRate"
         %returns downsampled data which skips every 8 of the original dataset
         LABEL_1_v=f_label_v_binary;
@@ -166,35 +154,35 @@ while (randCounter>0)
 
 
         reduced_TS_COMPLETE_01 = TS_COMPLETE_01;
-%         reduced_TS_COMPLETE_01(reduced_TS_COMPLETE_01 > 0) = 1;
-%         reduced_TS_COMPLETE_01(reduced_TS_COMPLETE_01 < 0) = 2;
+        reduced_TS_COMPLETE_01(reduced_TS_COMPLETE_01 > 0) = 1;
+        reduced_TS_COMPLETE_01(reduced_TS_COMPLETE_01 < 0) = 2;
         reduced_TS_COMPLETE_02 = TS_COMPLETE_02;
-%         reduced_TS_COMPLETE_02(reduced_TS_COMPLETE_02 > 0) = 1;
-%         reduced_TS_COMPLETE_02(reduced_TS_COMPLETE_02 < 0) = 2;
+        reduced_TS_COMPLETE_02(reduced_TS_COMPLETE_02 > 0) = 1;
+        reduced_TS_COMPLETE_02(reduced_TS_COMPLETE_02 < 0) = 2;
         reduced_TS_COMPLETE_11 = TS_COMPLETE_11;
-%         reduced_TS_COMPLETE_11(reduced_TS_COMPLETE_11 > 0) = 1;
-%         reduced_TS_COMPLETE_11(reduced_TS_COMPLETE_11 < 0) = 2;
+        reduced_TS_COMPLETE_11(reduced_TS_COMPLETE_11 > 0) = 1;
+        reduced_TS_COMPLETE_11(reduced_TS_COMPLETE_11 < 0) = 2;
         reduced_TS_COMPLETE_12 = TS_COMPLETE_12;
-%         reduced_TS_COMPLETE_12(reduced_TS_COMPLETE_12 > 0) = 1;
-%         reduced_TS_COMPLETE_12(reduced_TS_COMPLETE_12 < 0) = 2;
+        reduced_TS_COMPLETE_12(reduced_TS_COMPLETE_12 > 0) = 1;
+        reduced_TS_COMPLETE_12(reduced_TS_COMPLETE_12 < 0) = 2;
         reduced_TS_COMPLETE_21 = TS_COMPLETE_21;
-%         reduced_TS_COMPLETE_21(reduced_TS_COMPLETE_21 > 0) = 1;
-%         reduced_TS_COMPLETE_21(reduced_TS_COMPLETE_21 < 0) = 2;
+        reduced_TS_COMPLETE_21(reduced_TS_COMPLETE_21 > 0) = 1;
+        reduced_TS_COMPLETE_21(reduced_TS_COMPLETE_21 < 0) = 2;
         reduced_TS_COMPLETE_22 = TS_COMPLETE_22;
-%         reduced_TS_COMPLETE_22(reduced_TS_COMPLETE_22 > 0) = 1;
-%         reduced_TS_COMPLETE_22(reduced_TS_COMPLETE_22 < 0) = 2;
+        reduced_TS_COMPLETE_22(reduced_TS_COMPLETE_22 > 0) = 1;
+        reduced_TS_COMPLETE_22(reduced_TS_COMPLETE_22 < 0) = 2;
         reduced_TS_COMPLETE_31 = TS_COMPLETE_31;
-%         reduced_TS_COMPLETE_31(reduced_TS_COMPLETE_31 > 0) = 1;
-%         reduced_TS_COMPLETE_31(reduced_TS_COMPLETE_31 < 0) = 2;
+        reduced_TS_COMPLETE_31(reduced_TS_COMPLETE_31 > 0) = 1;
+        reduced_TS_COMPLETE_31(reduced_TS_COMPLETE_31 < 0) = 2;
         reduced_TS_COMPLETE_32 = TS_COMPLETE_32;
-%         reduced_TS_COMPLETE_32(reduced_TS_COMPLETE_32 > 0) = 1;
-%         reduced_TS_COMPLETE_32(reduced_TS_COMPLETE_32 < 0) = 2;
+        reduced_TS_COMPLETE_32(reduced_TS_COMPLETE_32 > 0) = 1;
+        reduced_TS_COMPLETE_32(reduced_TS_COMPLETE_32 < 0) = 2;
         reduced_TS_COMPLETE_41 = TS_COMPLETE_41;
-%         reduced_TS_COMPLETE_41(reduced_TS_COMPLETE_41 > 0) = 1;
-%         reduced_TS_COMPLETE_41(reduced_TS_COMPLETE_41 < 0) = 2;
+        reduced_TS_COMPLETE_41(reduced_TS_COMPLETE_41 > 0) = 1;
+        reduced_TS_COMPLETE_41(reduced_TS_COMPLETE_41 < 0) = 2;
         reduced_TS_COMPLETE_42 = TS_COMPLETE_42;
-%         reduced_TS_COMPLETE_42(reduced_TS_COMPLETE_42 > 0) = 1;
-%         reduced_TS_COMPLETE_42(reduced_TS_COMPLETE_42 < 0) = 2;
+        reduced_TS_COMPLETE_42(reduced_TS_COMPLETE_42 > 0) = 1;
+        reduced_TS_COMPLETE_42(reduced_TS_COMPLETE_42 < 0) = 2;
         reduced_L_TS_COMPLETE_1 = L_TS_COMPLETE_01;
         reduced_L_TS_COMPLETE_1(reduced_L_TS_COMPLETE_1 == 1) = 0;
         reduced_L_TS_COMPLETE_1(reduced_L_TS_COMPLETE_1 == 2) = 1;
@@ -237,173 +225,76 @@ while (randCounter>0)
         [SAMPL_DATA_42_train, SAMPL_DATA_42_test] = select_traintest(L1_2, L2_2, TS_COMPLETE_42);
 
         reduced_SAMPL_DATA_01_train = SAMPL_DATA_01_train;
-%         reduced_SAMPL_DATA_01_train(reduced_SAMPL_DATA_01_train > 0) = 1;
-%         reduced_SAMPL_DATA_01_train(reduced_SAMPL_DATA_01_train < 0) = 2;
+        reduced_SAMPL_DATA_01_train(reduced_SAMPL_DATA_01_train > 0) = 1;
+        reduced_SAMPL_DATA_01_train(reduced_SAMPL_DATA_01_train < 0) = 2;
         reduced_SAMPL_DATA_02_train = SAMPL_DATA_02_train;
-%         reduced_SAMPL_DATA_02_train(reduced_SAMPL_DATA_02_train > 0) = 1;
-%         reduced_SAMPL_DATA_02_train(reduced_SAMPL_DATA_02_train < 0) = 2;
+        reduced_SAMPL_DATA_02_train(reduced_SAMPL_DATA_02_train > 0) = 1;
+        reduced_SAMPL_DATA_02_train(reduced_SAMPL_DATA_02_train < 0) = 2;
         reduced_SAMPL_DATA_01_test = SAMPL_DATA_01_test;
-%         reduced_SAMPL_DATA_01_test(reduced_SAMPL_DATA_01_test > 0) = 1;
-%         reduced_SAMPL_DATA_01_test(reduced_SAMPL_DATA_01_test < 0) = 2;
+        reduced_SAMPL_DATA_01_test(reduced_SAMPL_DATA_01_test > 0) = 1;
+        reduced_SAMPL_DATA_01_test(reduced_SAMPL_DATA_01_test < 0) = 2;
         reduced_SAMPL_DATA_02_test = SAMPL_DATA_02_test;
-%         reduced_SAMPL_DATA_02_test(reduced_SAMPL_DATA_02_test > 0) = 1;
-%         reduced_SAMPL_DATA_02_test(reduced_SAMPL_DATA_02_test < 0) = 2;
+        reduced_SAMPL_DATA_02_test(reduced_SAMPL_DATA_02_test > 0) = 1;
+        reduced_SAMPL_DATA_02_test(reduced_SAMPL_DATA_02_test < 0) = 2;
         reduced_SAMPL_DATA_11_train = SAMPL_DATA_11_train;
-%         reduced_SAMPL_DATA_11_train(reduced_SAMPL_DATA_11_train > 0) = 1;
-%         reduced_SAMPL_DATA_11_train(reduced_SAMPL_DATA_11_train < 0) = 2;
+        reduced_SAMPL_DATA_11_train(reduced_SAMPL_DATA_11_train > 0) = 1;
+        reduced_SAMPL_DATA_11_train(reduced_SAMPL_DATA_11_train < 0) = 2;
         reduced_SAMPL_DATA_12_train = SAMPL_DATA_12_train;
-%         reduced_SAMPL_DATA_12_train(reduced_SAMPL_DATA_12_train > 0) = 1;
-%         reduced_SAMPL_DATA_12_train(reduced_SAMPL_DATA_12_train < 0) = 2;
+        reduced_SAMPL_DATA_12_train(reduced_SAMPL_DATA_12_train > 0) = 1;
+        reduced_SAMPL_DATA_12_train(reduced_SAMPL_DATA_12_train < 0) = 2;
         reduced_SAMPL_DATA_11_test = SAMPL_DATA_11_test;
-%         reduced_SAMPL_DATA_11_test(reduced_SAMPL_DATA_11_test > 0) = 1;
-%         reduced_SAMPL_DATA_11_test(reduced_SAMPL_DATA_11_test < 0) = 2;
+        reduced_SAMPL_DATA_11_test(reduced_SAMPL_DATA_11_test > 0) = 1;
+        reduced_SAMPL_DATA_11_test(reduced_SAMPL_DATA_11_test < 0) = 2;
         reduced_SAMPL_DATA_12_test = SAMPL_DATA_12_test;
-%         reduced_SAMPL_DATA_12_test(reduced_SAMPL_DATA_12_test > 0) = 1;
-%         reduced_SAMPL_DATA_12_test(reduced_SAMPL_DATA_12_test < 0) = 2;
+        reduced_SAMPL_DATA_12_test(reduced_SAMPL_DATA_12_test > 0) = 1;
+        reduced_SAMPL_DATA_12_test(reduced_SAMPL_DATA_12_test < 0) = 2;
         reduced_SAMPL_DATA_21_train = SAMPL_DATA_21_train;
-%         reduced_SAMPL_DATA_21_train(reduced_SAMPL_DATA_21_train > 0) = 1;
-%         reduced_SAMPL_DATA_21_train(reduced_SAMPL_DATA_21_train < 0) = 2;
+        reduced_SAMPL_DATA_21_train(reduced_SAMPL_DATA_21_train > 0) = 1;
+        reduced_SAMPL_DATA_21_train(reduced_SAMPL_DATA_21_train < 0) = 2;
         reduced_SAMPL_DATA_22_train = SAMPL_DATA_22_train;
-%         reduced_SAMPL_DATA_22_train(reduced_SAMPL_DATA_22_train > 0) = 1;
-%         reduced_SAMPL_DATA_22_train(reduced_SAMPL_DATA_22_train < 0) = 2;
+        reduced_SAMPL_DATA_22_train(reduced_SAMPL_DATA_22_train > 0) = 1;
+        reduced_SAMPL_DATA_22_train(reduced_SAMPL_DATA_22_train < 0) = 2;
         reduced_SAMPL_DATA_21_test = SAMPL_DATA_21_test;
-%         reduced_SAMPL_DATA_21_test(reduced_SAMPL_DATA_21_test > 0) = 1;
-%         reduced_SAMPL_DATA_21_test(reduced_SAMPL_DATA_21_test < 0) = 2;
+        reduced_SAMPL_DATA_21_test(reduced_SAMPL_DATA_21_test > 0) = 1;
+        reduced_SAMPL_DATA_21_test(reduced_SAMPL_DATA_21_test < 0) = 2;
         reduced_SAMPL_DATA_22_test = SAMPL_DATA_22_test;
-%         reduced_SAMPL_DATA_22_test(reduced_SAMPL_DATA_22_test > 0) = 1;
-%         reduced_SAMPL_DATA_22_test(reduced_SAMPL_DATA_22_test < 0) = 2;
+        reduced_SAMPL_DATA_22_test(reduced_SAMPL_DATA_22_test > 0) = 1;
+        reduced_SAMPL_DATA_22_test(reduced_SAMPL_DATA_22_test < 0) = 2;
         reduced_SAMPL_DATA_31_train = SAMPL_DATA_31_train;
-%         reduced_SAMPL_DATA_31_train(reduced_SAMPL_DATA_31_train > 0) = 1;
-%         reduced_SAMPL_DATA_31_train(reduced_SAMPL_DATA_31_train < 0) = 2;
+        reduced_SAMPL_DATA_31_train(reduced_SAMPL_DATA_31_train > 0) = 1;
+        reduced_SAMPL_DATA_31_train(reduced_SAMPL_DATA_31_train < 0) = 2;
         reduced_SAMPL_DATA_32_train = SAMPL_DATA_32_train;
-%         reduced_SAMPL_DATA_32_train(reduced_SAMPL_DATA_32_train > 0) = 1;
-%         reduced_SAMPL_DATA_32_train(reduced_SAMPL_DATA_32_train < 0) = 2;
+        reduced_SAMPL_DATA_32_train(reduced_SAMPL_DATA_32_train > 0) = 1;
+        reduced_SAMPL_DATA_32_train(reduced_SAMPL_DATA_32_train < 0) = 2;
         reduced_SAMPL_DATA_31_test = SAMPL_DATA_31_test;
-%         reduced_SAMPL_DATA_31_test(reduced_SAMPL_DATA_31_test > 0) = 1;
-%         reduced_SAMPL_DATA_31_test(reduced_SAMPL_DATA_31_test < 0) = 2;
+        reduced_SAMPL_DATA_31_test(reduced_SAMPL_DATA_31_test > 0) = 1;
+        reduced_SAMPL_DATA_31_test(reduced_SAMPL_DATA_31_test < 0) = 2;
         reduced_SAMPL_DATA_32_test = SAMPL_DATA_32_test;
-%         reduced_SAMPL_DATA_32_test(reduced_SAMPL_DATA_32_test > 0) = 1;
-%         reduced_SAMPL_DATA_32_test(reduced_SAMPL_DATA_32_test < 0) = 2;
+        reduced_SAMPL_DATA_32_test(reduced_SAMPL_DATA_32_test > 0) = 1;
+        reduced_SAMPL_DATA_32_test(reduced_SAMPL_DATA_32_test < 0) = 2;
         reduced_SAMPL_DATA_41_train = SAMPL_DATA_41_train;
-%         reduced_SAMPL_DATA_41_train(reduced_SAMPL_DATA_41_train > 0) = 1;
-%         reduced_SAMPL_DATA_41_train(reduced_SAMPL_DATA_41_train < 0) = 2;
+        reduced_SAMPL_DATA_41_train(reduced_SAMPL_DATA_41_train > 0) = 1;
+        reduced_SAMPL_DATA_41_train(reduced_SAMPL_DATA_41_train < 0) = 2;
         reduced_SAMPL_DATA_42_train = SAMPL_DATA_42_train;
-%         reduced_SAMPL_DATA_42_train(reduced_SAMPL_DATA_42_train > 0) = 1;
-%         reduced_SAMPL_DATA_42_train(reduced_SAMPL_DATA_42_train < 0) = 2;
+        reduced_SAMPL_DATA_42_train(reduced_SAMPL_DATA_42_train > 0) = 1;
+        reduced_SAMPL_DATA_42_train(reduced_SAMPL_DATA_42_train < 0) = 2;
         reduced_SAMPL_DATA_41_test = SAMPL_DATA_41_test;
-%         reduced_SAMPL_DATA_41_test(reduced_SAMPL_DATA_41_test > 0) = 1;
-%         reduced_SAMPL_DATA_41_test(reduced_SAMPL_DATA_41_test < 0) = 2;
+        reduced_SAMPL_DATA_41_test(reduced_SAMPL_DATA_41_test > 0) = 1;
+        reduced_SAMPL_DATA_41_test(reduced_SAMPL_DATA_41_test < 0) = 2;
         reduced_SAMPL_DATA_42_test = SAMPL_DATA_42_test;
-%         reduced_SAMPL_DATA_42_test(reduced_SAMPL_DATA_42_test > 0) = 1;
-%         reduced_SAMPL_DATA_42_test(reduced_SAMPL_DATA_42_test < 0) = 2;
+        reduced_SAMPL_DATA_42_test(reduced_SAMPL_DATA_42_test > 0) = 1;
+        reduced_SAMPL_DATA_42_test(reduced_SAMPL_DATA_42_test < 0) = 2;
         reduced_L_SAMPL_DATA_1_train = L_SAMPL_DATA_01_train - 1;
         reduced_L_SAMPL_DATA_2_train = L_SAMPL_DATA_02_train - 1;
         reduced_L_SAMPL_DATA_1_test = L_SAMPL_DATA_01_test - 1;
         reduced_L_SAMPL_DATA_2_test = L_SAMPL_DATA_02_test - 1;
 
-        % projM1_pos = zeros(channels_v,D);
-        % projM3_pos = zeros(channels_v_EEG,D);
-        % projM5_pos = zeros(channels_v_GSR,D);
-        % projM7_pos = zeros(channels_v_BVP,D);
-        % projM9_pos = zeros(channels_v_RES,D);
-        % 
-        % seed = randCounter;
-        % while seed>0
-        %     seedVectors = [genRandomHV(D);genRandomHV(D)];
-        %     seed = seed - 1;
-        % end
-        % projMvectors_pos  = containers.Map ('KeyType','double','ValueType','any');
-        % for i = 1:total_vectors
-        %     vec = seedVectors(1+binary(i,1), :);
-        %     for d = 2:length(binary(i,:))
-        %         vec = xor(vec, circshift(seedVectors(1+binary(i,d), :),d-1));
-        %     end
-        %     projMvectors_pos(i) = vec;
-        % end
-        % 
-        % for i=1:1:channels_v_EEG
-        %     projM3_pos(i,:) = projMvectors_pos(i);
-        % end
-        % for i=1:1:channels_v
-        %     projM1_pos(i,:) = projM3_pos(i,:);
-        % end
-        % for i=1:1:channels_v_GSR
-        %     projM5_pos(i,:) = projM3_pos(i,:);
-        % end
-        % for i=1:1:channels_v_BVP
-        %     projM7_pos(i,:) = projM3_pos(i,:);
-        % end
-        % for i=1:1:channels_v_RES
-        %     projM9_pos(i,:) = projM3_pos(i,:);
-        % end
-        % 
-        % projM1_neg = zeros(channels_v,D);
-        % projM3_neg = zeros(channels_v_EEG,D);
-        % projM5_neg = zeros(channels_v_GSR,D);
-        % projM7_neg = zeros(channels_v_BVP,D);
-        % projM9_neg = zeros(channels_v_RES,D);
-        % 
-        % seed = randCounter;
-        % while seed>0
-        %     seedVectors = [genRandomHV(D);genRandomHV(D)];
-        %     seed = seed - 1;
-        % end
-        % projMvectors_neg  = containers.Map ('KeyType','double','ValueType','any');
-        % for i = 1:total_vectors
-        %     vec = seedVectors(1+binary(i,1), :);
-        %     for d = 2:length(binary(i,:))
-        %         vec = xor(vec, circshift(seedVectors(1+binary(i,d), :),d-1));
-        %     end
-        %     projMvectors_neg(i) = vec;
-        % end
-        % 
-        % for i=1:1:channels_v_EEG
-        %     projM3_neg(i,:) = projMvectors_neg(i);
-        % end
-        % for i=1:1:channels_v
-        %     projM1_neg(i,:) = projM3_neg(i,:);
-        % end
-        % for i=1:1:channels_v_GSR
-        %     projM5_neg(i,:) = projM3_neg(i,:);
-        % end
-        % for i=1:1:channels_v_BVP
-        %     projM7_neg(i,:) = projM3_neg(i,:);
-        % end
-        % for i=1:1:channels_v_RES
-        %     projM9_neg(i,:) = projM3_neg(i,:);
-        % end
-
-%         projM1_neg = projM1;
-%         projM1_pos = projM1;
-%         projM1_neg(projM1_neg==-1) = 0;
-%         projM1_pos(projM1_pos==1) = 0;
-%         projM1_pos(projM1==-1) = 1;
-%         projM3_neg = projM3;
-%         projM3_pos = projM3;
-%         projM3_neg(projM3==-1) = 0;
-%         projM3_pos(projM3==1) = 0;
-%         projM3_pos(projM3==-1) = 1;
-%         projM5_neg = projM5;
-%         projM5_pos = projM5;
-%         projM5_neg(projM5==-1) = 0;
-%         projM5_pos(projM5==1) = 0;
-%         projM5_pos(projM5==-1) = 1;
-%         projM7_neg = projM7;
-%         projM7_pos = projM7;
-%         projM7_neg(projM7==-1) = 0;
-%         projM7_pos(projM7==1) = 0;
-%         projM7_pos(projM7==-1) = 1;
-%         projM9_neg = projM9;
-%         projM9_pos = projM9;
-%         projM9_neg(projM9==-1) = 0;
-%         projM9_pos(projM9==1) = 0;
-%         projM9_pos(projM9==-1) = 1;
                 
         %% V
         randCounter
         fprintf ('HDC for V\n');
         if (select == 1)
-            [hdc_model_2] = hdctrainproj (classes, reduced_L_SAMPL_DATA_2_train, reduced_SAMPL_DATA_02_train, reduced_SAMPL_DATA_12_train, reduced_SAMPL_DATA_22_train, reduced_SAMPL_DATA_32_train, reduced_SAMPL_DATA_42_train, chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES);
+            [hdc_model_2] = hdctrainproj (classes, reduced_L_SAMPL_DATA_2_train, reduced_SAMPL_DATA_02_train, reduced_SAMPL_DATA_12_train, reduced_SAMPL_DATA_22_train, reduced_SAMPL_DATA_32_train, reduced_SAMPL_DATA_42_train, chAM8, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, projM1_pos, projM1_neg, projM3_pos, projM3_neg, projM5_pos, projM5_neg, projM7_pos, projM7_neg, projM9_pos, projM9_neg);
         else
             [numpat_2, hdc_model_2] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_2, chAM8, iMch1, D, N, precision, channels_a,projM1_pos,projM1_neg, classes); 
             [numpat_4, hdc_model_4] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_4, chAM8, iMch3, D, N, precision, channels_a_ECG,projM3_pos,projM3_neg, classes); 
@@ -418,7 +309,7 @@ while (randCounter>0)
             hdc_model_2(1)=mode([hdc_model_2(1); hdc_model_4(1); hdc_model_6(1)]);
         end
         
-        [accexc_alltrz_v, acc_ex2v, acc2, pl2v, al2v, all_error,tranzErrorv] = hdcpredictproj  (reduced_L_SAMPL_DATA_2_test, reduced_SAMPL_DATA_02_test, reduced_SAMPL_DATA_12_test, reduced_SAMPL_DATA_22_test, reduced_SAMPL_DATA_32_test, reduced_SAMPL_DATA_42_test, hdc_model_2, chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, classes, channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES);
+        [accexc_alltrz_v, acc_ex2v, acc2, pl2v, al2v, all_error,tranzErrorv] = hdcpredictproj  (reduced_L_SAMPL_DATA_2_test, reduced_SAMPL_DATA_02_test, reduced_SAMPL_DATA_12_test, reduced_SAMPL_DATA_22_test, reduced_SAMPL_DATA_32_test, reduced_SAMPL_DATA_42_test, hdc_model_2, chAM8, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, classes, channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, projM1_pos, projM1_neg, projM3_pos, projM3_neg, projM5_pos, projM5_neg, projM7_pos, projM7_neg, projM9_pos, projM9_neg);
 
         pl2v = pl2v';
         acc2
@@ -434,7 +325,7 @@ while (randCounter>0)
         %randCounter
         fprintf ('HDC for A\n');
         if (select == 1)
-            [hdc_model_2] = hdctrainproj (classes, reduced_L_SAMPL_DATA_1_train, reduced_SAMPL_DATA_01_train, reduced_SAMPL_DATA_11_train, reduced_SAMPL_DATA_21_train, reduced_SAMPL_DATA_31_train, reduced_SAMPL_DATA_41_train, chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, channels_a, channels_a_EEG, channels_a_GSR, channels_a_BVP, channels_a_RES);
+            [hdc_model_2] = hdctrainproj (classes, reduced_L_SAMPL_DATA_1_train, reduced_SAMPL_DATA_01_train, reduced_SAMPL_DATA_11_train, reduced_SAMPL_DATA_21_train, reduced_SAMPL_DATA_31_train, reduced_SAMPL_DATA_41_train, chAM8, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, channels_a, channels_a_EEG, channels_a_GSR, channels_a_BVP, channels_a_RES, projM1_pos, projM1_neg, projM3_pos, projM3_neg, projM5_pos, projM5_neg, projM7_pos, projM7_neg, projM9_pos, projM9_neg);
         else
             [numpat_2, hdc_model_2] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_2, chAM8, iMch1, D, N, precision, channels_a,projM1_pos,projM1_neg, classes); 
             [numpat_4, hdc_model_4] = hdctrainproj (reduced_L_SAMPL_DATA_2, reduced_SAMPL_DATA_4, chAM8, iMch3, D, N, precision, channels_a_ECG,projM3_pos,projM3_neg, classes); 
@@ -449,7 +340,7 @@ while (randCounter>0)
             hdc_model_2(1)=mode([hdc_model_2(1); hdc_model_4(1); hdc_model_6(1)]);
         end
 
-        [accexc_alltrz_a, acc_ex2a, acc2, pl2a, al2a, all_error,tranzErrora] = hdcpredictproj  (reduced_L_SAMPL_DATA_1_test, reduced_SAMPL_DATA_01_test, reduced_SAMPL_DATA_11_test, reduced_SAMPL_DATA_21_test, reduced_SAMPL_DATA_31_test, reduced_SAMPL_DATA_41_test, hdc_model_2, chAM1, chAM3, chAM5, chAM7, chAM9, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, classes, channels_a, channels_a_EEG, channels_a_GSR, channels_a_BVP, channels_a_RES);
+        [accexc_alltrz_a, acc_ex2a, acc2, pl2a, al2a, all_error,tranzErrora] = hdcpredictproj  (reduced_L_SAMPL_DATA_1_test, reduced_SAMPL_DATA_01_test, reduced_SAMPL_DATA_11_test, reduced_SAMPL_DATA_21_test, reduced_SAMPL_DATA_31_test, reduced_SAMPL_DATA_41_test, hdc_model_2, chAM8, iMch1, iMch3, iMch5, iMch7, iMch9, D, N, precision, classes, channels_a, channels_a_EEG, channels_a_GSR, channels_a_BVP, channels_a_RES, projM1_pos, projM1_neg, projM3_pos, projM3_neg, projM5_pos, projM5_neg, projM7_pos, projM7_neg, projM9_pos, projM9_neg);
 
         pl2a = pl2a';
         acc2
@@ -613,7 +504,7 @@ subtracter = 1;
     end
 end
 
-function [iMch1, iMch3, iMch5, iMch7, iMch9, iMch8, chAM1, chAM3, chAM5, chAM7, chAM9, chAM8] = rule_90(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, initItemMemories, genRandomHV)
+function [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, projM1_pos, projM1_neg, projM3_pos, projM3_neg, projM5_pos, projM5_neg, projM7_pos, projM7_neg, projM9_pos, projM9_neg] = regular(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, q, initItemMemories, genRandomHV, projBRandomHV, randCounter)
     [chAM1, iMch1] = initItemMemories (D, maxL, channels_v);
     [chAM3, iMch3] = initItemMemories (D, maxL, channels_v_EEG);
     [chAM5, iMch5] = initItemMemories (D, maxL, channels_v_GSR);
@@ -621,8 +512,171 @@ function [iMch1, iMch3, iMch5, iMch7, iMch9, iMch8, chAM1, chAM3, chAM5, chAM7, 
     [chAM9, iMch9] = initItemMemories (D, maxL, channels_v_RES);
     [chAM8, iMch8] = initItemMemories (D, maxL, channels_v_EXG);
     
+    projM1=projBRandomHV(D,channels_v,q);
+    projM3=projBRandomHV(D,channels_v_EEG,q);
+    projM5=projBRandomHV(D,channels_v_GSR,q);
+    projM7=projBRandomHV(D,channels_v_BVP,q);
+    projM9=projBRandomHV(D,channels_v_RES,q);
+    
+    projM1_neg = projM1;
+    projM1_pos = projM1;
+    projM1_neg(projM1_neg==-1) = 0;
+    projM1_pos(projM1_pos==1) = 0;
+    projM1_pos(projM1==-1) = 1;
+    projM3_neg = projM3;
+    projM3_pos = projM3;
+    projM3_neg(projM3==-1) = 0;
+    projM3_pos(projM3==1) = 0;
+    projM3_pos(projM3==-1) = 1;
+    projM5_neg = projM5;
+    projM5_pos = projM5;
+    projM5_neg(projM5==-1) = 0;
+    projM5_pos(projM5==1) = 0;
+    projM5_pos(projM5==-1) = 1;
+    projM7_neg = projM7;
+    projM7_pos = projM7;
+    projM7_neg(projM7==-1) = 0;
+    projM7_pos(projM7==1) = 0;
+    projM7_pos(projM7==-1) = 1;
+    projM9_neg = projM9;
+    projM9_pos = projM9;
+    projM9_neg(projM9==-1) = 0;
+    projM9_pos(projM9==1) = 0;
+    projM9_pos(projM9==-1) = 1;
+end
+
+function [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, projM1_pos, projM1_neg, projM3_pos, projM3_neg, projM5_pos, projM5_neg, projM7_pos, projM7_neg, projM9_pos, projM9_neg] = rule_30(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, q, initItemMemories, genRandomHV, projBRandomHV, randCounter)
+    [chAM8, iMch8] = initItemMemories (D, maxL, channels_v_EXG);
+    
+    iMch1 = zeros(channels_v, D);
+    projM1_pos = zeros(channels_v, D);
+    projM1_neg = zeros(channels_v, D);
+
+    iMch3 = zeros(channels_v_EEG, D);
+    projM3_pos = zeros(channels_v_EEG, D);
+    projM3_neg = zeros(channels_v_EEG, D);
+
+    iMch5 = zeros(channels_v_GSR, D);
+    projM5_pos = zeros(channels_v_GSR, D);
+    projM5_neg = zeros(channels_v_GSR, D);
+
+    iMch7 = zeros(channels_v_BVP, D);
+    projM7_pos = zeros(channels_v_BVP, D);
+    projM7_neg = zeros(channels_v_BVP, D);
+
+    iMch9 = zeros(channels_v_RES, D);
+    projM9_pos = zeros(channels_v_RES, D);
+    projM9_neg = zeros(channels_v_RES, D);
+    
     combinations_necessary = max([channels_v_EEG, channels_v_GSR, channels_v, channels_v_BVP, channels_v_RES]);
-    total_vectors = combinations_necessary;
+    outputs = 0;
+    total_vectors = 0;
+
+    while (outputs < combinations_necessary)
+        outputs = vector_counter(total_vectors);
+        total_vectors = total_vectors + 1;
+    end
+    
+    rule = 30;
+    neighborhood_size = 3;
+    seed_vector = genRandomHV(D);
+    
+
+    offset = floor(neighborhood_size/2);
+    ruleset = fliplr(dec2bin(rule,2^neighborhood_size));
+    randSetVectors  = containers.Map ('KeyType','double','ValueType','any');
+    for i = 1:total_vectors
+        new_vector = zeros(1,D);
+        for d = 1:D
+            if d-offset<1
+                neighborhood = [seed_vector(D-(offset-d):D) seed_vector(1:d+offset)];
+            elseif d+offset>D
+                neighborhood = [seed_vector(d-offset:D) seed_vector(1:offset-(D-d))];
+            else
+                neighborhood = seed_vector(d-offset:d+offset);
+            end
+            index = bin2dec(num2str(neighborhood));
+            new_vector(d) = ruleset(index+1)-48;
+        end
+        seed_vector = new_vector;
+        randSetVectors(i) = seed_vector;
+    end
+    
+    combinations = final_arrange(values(randSetVectors));
+    [s1,s2] = size(combinations);
+
+    c = randCounter;
+    while (c>0)
+        randints = randi([1,s1],1,combinations_necessary);
+        c = c-1;
+    end
+
+    for i = 1:1:channels_v_RES
+        iMch9(i,:) = combinations{randints(i),1};
+        projM9_pos(i,:) = combinations{randints(i),2};
+        projM9_neg(i,:) = combinations{randints(i),3};
+    end
+        randints = randi([1,s1],1,combinations_necessary);
+
+    for i = 1:1:channels_v_BVP
+        iMch7(i,:) = combinations{randints(i),1};
+        projM7_pos(i,:) = combinations{randints(i),2};
+        projM7_neg(i,:) = combinations{randints(i),3};
+    end
+        randints = randi([1,s1],1,combinations_necessary);
+
+    for i = 1:1:channels_v_GSR
+        iMch5(i,:) = combinations{randints(i),1};
+        projM5_pos(i,:) = combinations{randints(i),2};
+        projM5_neg(i,:) = combinations{randints(i),3};
+    end
+        randints = randi([1,s1],1,combinations_necessary);
+
+    for i=1:1:channels_v_EEG
+        iMch3(i,:) = combinations{randints(i),1};
+        projM3_pos(i,:) = combinations{randints(i),2};
+        projM3_neg(i,:) = combinations{randints(i),3};
+    end
+        randints = randi([1,s1],1,combinations_necessary);
+
+    for i=1:1:channels_v
+        iMch1(i,:) = combinations{randints(i),1};
+        projM1_pos(i,:) = combinations{randints(i),2};
+        projM1_neg(i,:) = combinations{randints(i),3};
+    end
+end
+
+function [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, projM1_pos, projM1_neg, projM3_pos, projM3_neg, projM5_pos, projM5_neg, projM7_pos, projM7_neg, projM9_pos, projM9_neg] = rule_90(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, q, initItemMemories, genRandomHV, projBRandomHV, randCounter)
+    [chAM8, iMch8] = initItemMemories (D, maxL, channels_v_EXG);
+    
+    iMch1 = zeros(channels_v, D);
+    projM1_pos = zeros(channels_v, D);
+    projM1_neg = zeros(channels_v, D);
+
+    iMch3 = zeros(channels_v_EEG, D);
+    projM3_pos = zeros(channels_v_EEG, D);
+    projM3_neg = zeros(channels_v_EEG, D);
+
+    iMch5 = zeros(channels_v_GSR, D);
+    projM5_pos = zeros(channels_v_GSR, D);
+    projM5_neg = zeros(channels_v_GSR, D);
+
+    iMch7 = zeros(channels_v_BVP, D);
+    projM7_pos = zeros(channels_v_BVP, D);
+    projM7_neg = zeros(channels_v_BVP, D);
+
+    iMch9 = zeros(channels_v_RES, D);
+    projM9_pos = zeros(channels_v_RES, D);
+    projM9_neg = zeros(channels_v_RES, D);
+    
+    combinations_necessary = max([channels_v_EEG, channels_v_GSR, channels_v, channels_v_BVP, channels_v_RES]);
+    outputs = 0;
+    total_vectors = 0;
+
+    while (outputs < combinations_necessary)
+        outputs = vector_counter(total_vectors);
+        total_vectors = total_vectors + 1;
+    end
     
     seed_vector = genRandomHV(D);
     randSetVectors  = containers.Map ('KeyType','double','ValueType','any');
@@ -630,29 +684,47 @@ function [iMch1, iMch3, iMch5, iMch7, iMch9, iMch8, chAM1, chAM3, chAM5, chAM7, 
         seed_vector = xor(circshift(seed_vector,1),circshift(seed_vector,-1));
         randSetVectors(i) = seed_vector;
     end
+    
+    combinations = final_arrange(values(randSetVectors));
+    [s1,s2] = size(combinations);
+
+    c = randCounter;
+    while (c>0)
+        randints = randi([1,s1],1,combinations_necessary);
+        c = c-1;
+    end
 
     for i = 1:1:channels_v_RES
-        %randVs = randperm(total_vectors);
-        iMch9(i) = randSetVectors(i);
+        iMch9(i,:) = combinations{randints(i),1};
+        projM9_pos(i,:) = combinations{randints(i),2};
+        projM9_neg(i,:) = combinations{randints(i),3};
     end
+        randints = randi([1,s1],1,combinations_necessary);
 
     for i = 1:1:channels_v_BVP
-        %randVs = randperm(total_vectors);
-        iMch7(i) = randSetVectors(i);
+        iMch7(i,:) = combinations{randints(i),1};
+        projM7_pos(i,:) = combinations{randints(i),2};
+        projM7_neg(i,:) = combinations{randints(i),3};
     end
+        randints = randi([1,s1],1,combinations_necessary);
 
     for i = 1:1:channels_v_GSR
-        %randVs = randperm(total_vectors);
-        iMch5(i) = randSetVectors(i);
+        iMch5(i,:) = combinations{randints(i),1};
+        projM5_pos(i,:) = combinations{randints(i),2};
+        projM5_neg(i,:) = combinations{randints(i),3};
     end
-    
-    for i = 1:1:channels_v_EEG
-        %randVs = randperm(total_vectors);
-        iMch3(i) = randSetVectors(i);
+        randints = randi([1,s1],1,combinations_necessary);
+
+    for i=1:1:channels_v_EEG
+        iMch3(i,:) = combinations{randints(i),1};
+        projM3_pos(i,:) = combinations{randints(i),2};
+        projM3_neg(i,:) = combinations{randints(i),3};
     end
-    
-    for i = 1:1:channels_v
-        %randVs = randperm(total_vectors);
-        iMch1(i) = randSetVectors(i);
+        randints = randi([1,s1],1,combinations_necessary);
+
+    for i=1:1:channels_v
+        iMch1(i,:) = combinations{randints(i),1};
+        projM1_pos(i,:) = combinations{randints(i),2};
+        projM1_neg(i,:) = combinations{randints(i),3};
     end
 end

@@ -19,7 +19,7 @@ function message = HD_functions_unoptimized
   message='Importing all HD functions';
 end
 
-function [L1, L2, L_SAMPL_DATA_train, SAMPL_DATA_train, L_SAMPL_DATA_test,SAMPL_DATA_test] = genTrainTestData (data, labels, trainingFrac, order)
+function [L1, L2, L_SAMPL_DATA_train, SAMPL_DATA_train, L_SAMPL_DATA_test,SAMPL_DATA_test] = genTrainTestData (data, labels, trainingFrac, order,N)
 %
 % DESCRIPTION   : generates a dataset to train the alorithm using a fraction of the input data 
 %
@@ -47,17 +47,16 @@ function [L1, L2, L_SAMPL_DATA_train, SAMPL_DATA_train, L_SAMPL_DATA_test,SAMPL_
     % want to select randomly of the labels to train
     randomizedL1 = L1(randperm(length(L1)));
     randomizedL2 = L2(randperm(length(L2)));
-    test_length = length(L1) - floor(length(randomizedL1) * trainingFrac);
+    L1_length_train = floor(length(randomizedL1) * trainingFrac);
+    L2_length_train = floor(length(randomizedL2) * trainingFrac);
     if (floor(length(randomizedL1) * trainingFrac) < N)
         L1_length_train = N;
-        test_length = length(L1) - L1_length_train;
     end
-    if (test_length < N)
-        extra_needed = N - (length(L1)-floor(length(randomizedL1) * trainingFrac));
-        L1_length_train = floor(length(randomizedL1) * trainingFrac) - extra_needed;
+    if (floor(length(randomizedL2) * trainingFrac) < N)
+        L2_length_train = N;
     end
-    L1 = randomizedL1 (1 : floor(length(randomizedL1) * trainingFrac));
-    L2 = randomizedL2 (1 : floor(length(randomizedL2) * trainingFrac));
+    L1 = randomizedL1 (1 : L1_length_train);
+    L2 = randomizedL2 (1 : L2_length_train);
     %L1 = L1 (1 : floor(length(L1) * trainingFrac));
     %L2 = L2 (1 : floor(length(L2) * trainingFrac));
     L3 = L3 (1 : floor(length(L3) * trainingFrac));
@@ -908,7 +907,7 @@ function [AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, tra
                 end
             else
                 if (size(trainVecList((i-count_label):(i-1),1),1) == 0)
-                    AM(label) = genrandomHV(D);
+                    AM(label) = genRandomHV(D);
                 end
                 %AM(label) = mode([trainVecList((i-count_label):(i-1),:); genRandomHV(D)]);
                 AM(label) = mode([trainVecList((i-count_label):(i-1),:); trainVecList((i-count_label),:)]);
@@ -935,7 +934,7 @@ function [AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, tra
         end
     else
         if (size(trainVecList((i-count_label):(i-1),1),1) == 0)
-            AM(label) = genrandomHV(D);
+            AM(label) = genRandomHV(D);
         end
         %AM(label) = mode([trainVecList((i-count_label):(i-1),:); genRandomHV(D)]);
         AM(label) = mode([trainVecList((i-count_label):(i-1),:); trainVecList((i-count_label),:)]);
@@ -1056,7 +1055,7 @@ function [accexc_alltrz, accExcTrnz, accuracy, predicLabel, actualLabel, all_err
         predicLabel(i : i+N-1) = predict_hamm;
         %all_error = [all_error error]; %#ok<AGROW>
         %second_error_all = [second_error_all second_error]; %#ok<AGROW>
-        if predict_hamm == actualLabel(i)
+        %if predict_hamm == actualLabel(i)
 			correct = correct + 1;
         elseif labelTestSet1 (i) ~= labelTestSet1(i+N-1)
 			tranzError = tranzError + 1;

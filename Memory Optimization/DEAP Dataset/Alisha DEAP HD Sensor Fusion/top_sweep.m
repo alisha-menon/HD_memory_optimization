@@ -29,9 +29,9 @@ end
 %%
 randCounter= 10; %per subject
 full_count = randCounter;
-learningrate=[0.7]; % percentage of the dataset used to train the algorithm
+learningrate=[0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]; % percentage of the dataset used to train the algorithm
 downSampRate = 1;
-ngram = 2; % for temporal encode
+ngram = 1; % for temporal encode
 subjects = 32;
 % D_full = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]; %dimension of the hypervectors
 D_full = [10000];
@@ -53,6 +53,36 @@ channels_v_BVP=length(features_BVP(1,:));
 channels_v_RES=length(features_RES(1,:));
 channels_v_EXG=channels_v+channels_v_EEG+channels_v_GSR+channels_v_BVP+channels_v_RES;
 
+% min_A1 = 40;
+% min_A2 = 40;
+% min_V1 = 40;
+% min_V2 = 40;
+% for count_through = 1:1:32
+%     features=inputs((count_through-1)*40+1:count_through*40,:);
+%     f_label_a_binary=features(:,239);
+%     f_label_v_binary=features(:,240);
+%     m = 5;
+%     f_label_a_binary(f_label_a_binary < m) = 1;
+%     f_label_a_binary(f_label_a_binary >= m) = 2;
+%     f_label_v_binary(f_label_v_binary < m) = 1;
+%     f_label_v_binary(f_label_v_binary >= m) = 2;
+%     A1 = find(f_label_a_binary == 1);
+%     A2 = find(f_label_a_binary == 2);
+%     V1 = find(f_label_v_binary == 1);
+%     V2 = find(f_label_v_binary == 2);
+%     if (length(A1) < min_A1)
+%         min_A1 = length(A1);
+%     end
+%     if (length(V1) < min_V1)
+%         min_V1 = length(V1);
+%     end
+%     if (length(A2) < min_A2)
+%         min_A2 = length(A2);
+%     end
+%     if (length(V2) < min_V2)
+%         min_V2 = length(V2);
+%     end
+% end
 acc_matrix = zeros(randCounter*2,subjects);
 acc_matrix_ex = zeros(randCounter*2,subjects);
 acc_matrix_ex_all = zeros(randCounter*2,subjects);
@@ -304,7 +334,7 @@ for learn_count = 1:1:length(learningrate)
             reduced_L_SAMPL_DATA_1_test = L_SAMPL_DATA_01_test - 1;
             reduced_L_SAMPL_DATA_2_test = L_SAMPL_DATA_02_test - 1;
 
-            %% V
+            %% V (this actually A though)
             randCounter
             fprintf ('HDC for V\n');
             if (select == 1)
@@ -335,7 +365,7 @@ for learn_count = 1:1:length(learningrate)
             acc_matrix_Vex_all(randCounter,subject) = accexc_alltrz_v;
             val_right = (pl2v == al2v);
 
-            %% A
+            %% A (this is actually V though)
             %randCounter
             fprintf ('HDC for A\n');
             if (select == 1)

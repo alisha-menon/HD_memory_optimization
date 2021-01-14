@@ -47,24 +47,13 @@ function [L1, L2, L_SAMPL_DATA_train, SAMPL_DATA_train, L_SAMPL_DATA_test,SAMPL_
     % want to select randomly of the labels to train
     randomizedL1 = L1(randperm(length(L1)));
     randomizedL2 = L2(randperm(length(L2)));
-    test_length = length(L1) - floor(length(randomizedL1) * trainingFrac);
     L1_length_train = floor(length(randomizedL1) * trainingFrac);
     L2_length_train = floor(length(randomizedL2) * trainingFrac);
     if (floor(length(randomizedL1) * trainingFrac) < N)
         L1_length_train = N;
-        test_length = length(L1) - L1_length_train;
-    end
-    if (test_length < N)
-        extra_needed = N - test_length;
-        L1_length_train = L1_length_train - extra_needed;
     end
     if (floor(length(randomizedL2) * trainingFrac) < N)
         L2_length_train = N;
-        test_length = length(L2) - L2_length_train;
-    end
-    if (test_length < N)
-        extra_needed = N - test_length;
-        L2_length_train = L2_length_train - extra_needed;
     end
     L1 = randomizedL1 (1 : L1_length_train);
     L2 = randomizedL2 (1 : L2_length_train);
@@ -920,7 +909,7 @@ function [AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, tra
                 end
             else
                 if (size(trainVecList((i-count_label):(i-1),1),1) == 0)
-                    AM(label) = genrandomHV(D);
+                    AM(label) = genRandomHV(D);
                 end
                 %AM(label) = mode([trainVecList((i-count_label):(i-1),:); genRandomHV(D)]);
                 AM(label) = mode([trainVecList((i-count_label):(i-1),:); trainVecList((i-count_label),:)]);
@@ -947,7 +936,7 @@ function [AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, tra
         end
     else
         if (size(trainVecList((i-count_label):(i-1),1),1) == 0)
-            AM(label) = genrandomHV(D);
+            AM(label) = genRandomHV(D);
         end        
         %AM(label) = mode([trainVecList((i-count_label):(i-1),:); genRandomHV(D)]);
         AM(label) = mode([trainVecList((i-count_label):(i-1),:); trainVecList((i-count_label),:)]);

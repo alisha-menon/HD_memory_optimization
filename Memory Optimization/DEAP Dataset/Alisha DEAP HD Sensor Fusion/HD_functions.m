@@ -892,7 +892,7 @@ function [AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, tra
             %trainVecList(1 , :) = 3;
             %label
             if (mod(size(trainVecList((i-count_label):(i-1),1),1),2) == 1)
-                if (size(trainVecList,1) == 1)
+                if (size(trainVecList((i-count_label):(i-1),1),1) == 1)
                     AM(label) = trainVecList(1,:);
                 else
                     AM (label) = mode (trainVecList((i-count_label):(i-1),:));
@@ -916,7 +916,7 @@ function [AM] = hdctrainproj (classes, labelTrainSet1, trainSet1, trainSet2, tra
     %labelTrainSet1(l)
     %trainVecList(1 , :) = 3;
     if (mod(size(trainVecList((i-count_label):(i-1),1),1),2) == 1)
-        if (size(trainVecList,1) == 1)
+        if (size(trainVecList((i-count_label):(i-1),1),1) == 1)
             AM(label) = trainVecList(1,:);
         else
             AM (label) = mode (trainVecList((i-count_label):(i-1),:));

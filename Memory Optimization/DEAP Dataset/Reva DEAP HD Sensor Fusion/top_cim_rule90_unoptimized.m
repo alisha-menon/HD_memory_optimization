@@ -36,7 +36,7 @@ subjects = 32;
 % D_full = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]; %dimension of the hypervectors
 D_full = [10000];
 maxL = 10; % for CiM
-N = ngram;
+N = ngram;  
 precision = 10; % for CiM
 %====Features and Label===
 load('DEAP_data.mat')

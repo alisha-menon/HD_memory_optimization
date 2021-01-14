@@ -32,7 +32,7 @@ full_count = randCounter;
 learningrate=[0.7]; % percentage of the dataset used to train the algorithm
 downSampRate = 1;
 ngram = 2; % for temporal encode
-subjects = 13;
+subjects = 32;
 % D_full = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]; %dimension of the hypervectors
 D_full = [10000];
 maxL = 2; % for CiM
@@ -75,7 +75,7 @@ for learn_count = 1:1:length(learningrate)
 
         [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, projM1_pos, projM1_neg, projM3_pos, projM3_neg, projM5_pos, projM5_neg, projM7_pos, projM7_neg, projM9_pos, projM9_neg] = regular(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, q, initItemMemories, genRandomHV, projBRandomHV, randCounter);
 
-        for subject = 13:1:subjects
+        for subject = 1:1:subjects
             subject
             features=inputs((subject-1)*40+1:subject*40,:);
             f_label_a_binary=features(:,239);

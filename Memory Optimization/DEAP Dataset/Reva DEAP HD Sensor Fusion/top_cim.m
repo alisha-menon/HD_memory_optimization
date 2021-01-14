@@ -21,18 +21,18 @@ clear;
 % select = 2 for late fusion
 select = 1;
 if (select == 1)
-    HD_functions_cim_unoptimized;     % load HD functions
+    HD_functions_cim;     % load HD functions
 else 
     HD_functions_multiplex;
 end
 
 %%
-randCounter= 10; %per subject
+randCounter= 5; %per subject
 full_count = randCounter;
 learningrate=0.5; % percentage of the dataset used to train the algorithm
 downSampRate = 1;
 ngram = 3; % for temporal encode
-subjects = 32;
+subjects = 2;
 % D_full = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]; %dimension of the hypervectors
 D_full = [10000];
 maxL = 10; % for CiM
@@ -69,7 +69,10 @@ learningFrac = learningrate(1);
 while (randCounter>0)
     rng('shuffle');
     
-
+    %if rule30, add randCounter parameter
+    
+    [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, chAM1, chAM3, chAM5, chAM7, chAM9] = rule_30(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, initItemMemories,genRandomHV, randCounter);
+    
     for subject = 1:1:subjects
         subject
         features=inputs((subject-1)*40+1:subject*40,:);
@@ -103,14 +106,6 @@ while (randCounter>0)
          features(:,k)=features(:,k)/max(features(:,k));
         end
 
-%         for i=1:238
-%          features(:,i)=2*features(:,i)-1;
-%         end
-% 
-%         for i=1:238
-%          features(:,i)=features(:,i)+0.35;
-%         end
-
         features_EMG=features(:,1:10);
         features_EEG=features(:,11:202);
         features_GSR=features(:,203:209);
@@ -141,7 +136,6 @@ while (randCounter>0)
         classes = 2; % level of classes
         channels_a_EXG=channels_a+channels_a_EEG+channels_a_GSR+channels_a_BVP+channels_a_RES;
 
- 
         %downsample the dataset using the value contained in the variable "downSampRate"
         %returns downsampled data which skips every 8 of the original dataset
         LABEL_1_v=f_label_v_binary;
@@ -300,103 +294,6 @@ while (randCounter>0)
         reduced_L_SAMPL_DATA_1_test = L_SAMPL_DATA_01_test - 1;
         reduced_L_SAMPL_DATA_2_test = L_SAMPL_DATA_02_test - 1;
 
-        % projM1_pos = zeros(channels_v,D);
-        % projM3_pos = zeros(channels_v_EEG,D);
-        % projM5_pos = zeros(channels_v_GSR,D);
-        % projM7_pos = zeros(channels_v_BVP,D);
-        % projM9_pos = zeros(channels_v_RES,D);
-        % 
-        % seed = randCounter;
-        % while seed>0
-        %     seedVectors = [genRandomHV(D);genRandomHV(D)];
-        %     seed = seed - 1;
-        % end
-        % projMvectors_pos  = containers.Map ('KeyType','double','ValueType','any');
-        % for i = 1:total_vectors
-        %     vec = seedVectors(1+binary(i,1), :);
-        %     for d = 2:length(binary(i,:))
-        %         vec = xor(vec, circshift(seedVectors(1+binary(i,d), :),d-1));
-        %     end
-        %     projMvectors_pos(i) = vec;
-        % end
-        % 
-        % for i=1:1:channels_v_EEG
-        %     projM3_pos(i,:) = projMvectors_pos(i);
-        % end
-        % for i=1:1:channels_v
-        %     projM1_pos(i,:) = projM3_pos(i,:);
-        % end
-        % for i=1:1:channels_v_GSR
-        %     projM5_pos(i,:) = projM3_pos(i,:);
-        % end
-        % for i=1:1:channels_v_BVP
-        %     projM7_pos(i,:) = projM3_pos(i,:);
-        % end
-        % for i=1:1:channels_v_RES
-        %     projM9_pos(i,:) = projM3_pos(i,:);
-        % end
-        % 
-        % projM1_neg = zeros(channels_v,D);
-        % projM3_neg = zeros(channels_v_EEG,D);
-        % projM5_neg = zeros(channels_v_GSR,D);
-        % projM7_neg = zeros(channels_v_BVP,D);
-        % projM9_neg = zeros(channels_v_RES,D);
-        % 
-        % seed = randCounter;
-        % while seed>0
-        %     seedVectors = [genRandomHV(D);genRandomHV(D)];
-        %     seed = seed - 1;
-        % end
-        % projMvectors_neg  = containers.Map ('KeyType','double','ValueType','any');
-        % for i = 1:total_vectors
-        %     vec = seedVectors(1+binary(i,1), :);
-        %     for d = 2:length(binary(i,:))
-        %         vec = xor(vec, circshift(seedVectors(1+binary(i,d), :),d-1));
-        %     end
-        %     projMvectors_neg(i) = vec;
-        % end
-        % 
-        % for i=1:1:channels_v_EEG
-        %     projM3_neg(i,:) = projMvectors_neg(i);
-        % end
-        % for i=1:1:channels_v
-        %     projM1_neg(i,:) = projM3_neg(i,:);
-        % end
-        % for i=1:1:channels_v_GSR
-        %     projM5_neg(i,:) = projM3_neg(i,:);
-        % end
-        % for i=1:1:channels_v_BVP
-        %     projM7_neg(i,:) = projM3_neg(i,:);
-        % end
-        % for i=1:1:channels_v_RES
-        %     projM9_neg(i,:) = projM3_neg(i,:);
-        % end
-
-%         projM1_neg = projM1;
-%         projM1_pos = projM1;
-%         projM1_neg(projM1_neg==-1) = 0;
-%         projM1_pos(projM1_pos==1) = 0;
-%         projM1_pos(projM1==-1) = 1;
-%         projM3_neg = projM3;
-%         projM3_pos = projM3;
-%         projM3_neg(projM3==-1) = 0;
-%         projM3_pos(projM3==1) = 0;
-%         projM3_pos(projM3==-1) = 1;
-%         projM5_neg = projM5;
-%         projM5_pos = projM5;
-%         projM5_neg(projM5==-1) = 0;
-%         projM5_pos(projM5==1) = 0;
-%         projM5_pos(projM5==-1) = 1;
-%         projM7_neg = projM7;
-%         projM7_pos = projM7;
-%         projM7_neg(projM7==-1) = 0;
-%         projM7_pos(projM7==1) = 0;
-%         projM7_pos(projM7==-1) = 1;
-%         projM9_neg = projM9;
-%         projM9_pos = projM9;
-%         projM9_neg(projM9==-1) = 0;
-%         projM9_pos(projM9==1) = 0;
-%         projM9_pos(projM9==-1) = 1;
                 
         %% V
         randCounter
@@ -573,6 +470,139 @@ aaaaccuracy_sprdsht_ex_all(3,2) = aaacc_av_max_V_ex_all;
 aaaaccuracy_matrix_data = acc_matrix;
 aaaaccuracy_matrix_data_ex_all = acc_matrix_ex_all;
 
+function [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, chAM1, chAM3, chAM5, chAM7, chAM9] = regular(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, initItemMemories,genRandomHV, randCounter)
+    [chAM1, iMch1] = initItemMemories (D, maxL, channels_v);
+    [chAM3, iMch3] = initItemMemories (D, maxL, channels_v_EEG);
+    [chAM5, iMch5] = initItemMemories (D, maxL, channels_v_GSR);
+    [chAM7, iMch7] = initItemMemories (D, maxL, channels_v_BVP);
+    [chAM9, iMch9] = initItemMemories (D, maxL, channels_v_RES);
+    [chAM8, ~] = initItemMemories (D, maxL, channels_v_EXG);
+    
+end
+
+function [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, chAM1, chAM3, chAM5, chAM7, chAM9] = rule_30(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, initItemMemories, genRandomHV, randCounter)
+    [chAM1, iMch1] = initItemMemories (D, maxL, channels_v);
+    [chAM3, iMch3] = initItemMemories (D, maxL, channels_v_EEG);
+    [chAM5, iMch5] = initItemMemories (D, maxL, channels_v_GSR);
+    [chAM7, iMch7] = initItemMemories (D, maxL, channels_v_BVP);
+    [chAM9, iMch9] = initItemMemories (D, maxL, channels_v_RES);
+    [chAM8, ~] = initItemMemories (D, maxL, channels_v_EXG);
+
+    
+    
+    combinations_necessary = max([channels_v_EEG, channels_v_GSR, channels_v, channels_v_BVP, channels_v_RES]);
+    
+    outputs = 0;
+    total_vectors = combinations_necessary;
+
+%     while (outputs < combinations_necessary)
+%         outputs = vector_counter(total_vectors);
+%         total_vectors = total_vectors + 1;
+%     end
+%     
+    
+    
+    rule = 30;
+    neighborhood_size = 3;
+    seed_vector = genRandomHV(D);
+    
+
+    offset = floor(neighborhood_size/2);
+    ruleset = fliplr(dec2bin(rule,2^neighborhood_size));
+    randSetVectors  = containers.Map ('KeyType','double','ValueType','any');
+    
+    
+    
+    for i = 1:total_vectors
+        new_vector = zeros(1,D);
+        for d = 1:D
+            if d-offset<1
+                neighborhood = [seed_vector(D-(offset-d):D) seed_vector(1:d+offset)];
+            elseif d+offset>D
+                neighborhood = [seed_vector(d-offset:D) seed_vector(1:offset-(D-d))];
+            else
+                neighborhood = seed_vector(d-offset:d+offset);
+            end
+            index = bin2dec(num2str(neighborhood));
+            new_vector(d) = ruleset(index+1)-48;
+        end
+        seed_vector = new_vector;
+        randSetVectors(i) = seed_vector;
+    end
+
+    for i = 1:1:channels_v_RES
+        %randVs = randperm(total_vectors);
+        iMch9(i) = randSetVectors(i);
+    end
+
+    for i = 1:1:channels_v_BVP
+        %randVs = randperm(total_vectors);
+        iMch7(i) = randSetVectors(i);
+    end
+
+    for i = 1:1:channels_v_GSR
+        %randVs = randperm(total_vectors);
+        iMch5(i) = randSetVectors(i);
+    end
+    
+    for i = 1:1:channels_v_EEG
+        %randVs = randperm(total_vectors);
+        iMch3(i) = randSetVectors(i);
+    end
+    
+    for i = 1:1:channels_v
+        %randVs = randperm(total_vectors);
+        iMch1(i) = randSetVectors(i);
+    end
+
+end
+
+function [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, chAM1, chAM3, chAM5, chAM7, chAM9] = rule_90(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, initItemMemories,genRandomHV, randCounter)    
+    [chAM8, iMch8] = initItemMemories (D, maxL, channels_v_EXG);
+    [chAM1, iMch1] = initItemMemories (D, maxL, channels_v);
+    [chAM3, iMch3] = initItemMemories (D, maxL, channels_v_EEG);
+    [chAM5, iMch5] = initItemMemories (D, maxL, channels_v_GSR);
+    [chAM7, iMch7] = initItemMemories (D, maxL, channels_v_BVP);
+    [chAM9, iMch9] = initItemMemories (D, maxL, channels_v_RES);
+    %[chAM8, ~] = initItemMemories (D, maxL, channels_v_EXG);
+    
+    combinations_necessary = max([channels_v_EEG, channels_v_GSR, channels_v, channels_v_BVP, channels_v_RES]);
+    total_vectors = combinations_necessary;
+    
+    seed_vector = genRandomHV(D);
+    randSetVectors  = containers.Map ('KeyType','double','ValueType','any');
+    for i = 1:total_vectors
+        seed_vector = xor(circshift(seed_vector,1),circshift(seed_vector,-1));
+        randSetVectors(i) = seed_vector;
+    end
+
+    for i = 1:1:channels_v_RES
+        %randVs = randperm(total_vectors);
+        iMch9(i) = randSetVectors(i);
+    end
+
+    for i = 1:1:channels_v_BVP
+        %randVs = randperm(total_vectors);
+        iMch7(i) = randSetVectors(i);
+    end
+
+    for i = 1:1:channels_v_GSR
+        %randVs = randperm(total_vectors);
+        iMch5(i) = randSetVectors(i);
+    end
+    
+    for i = 1:1:channels_v_EEG
+        %randVs = randperm(total_vectors);
+        iMch3(i) = randSetVectors(i);
+    end
+    
+    for i = 1:1:channels_v
+        %randVs = randperm(total_vectors);
+        iMch1(i) = randSetVectors(i);
+    end
+end
+
+
 function vec_array = arrange_vectors(m)
     vec_array = [];
     m_copy = m;
@@ -609,90 +639,5 @@ subtracter = 1;
         num_vectors = num_vectors + floor((x-subtracter)/2);
         subtracter = subtracter + 1;
     
-    end
-end
-
-function [iMch1, iMch3, iMch5, iMch7, iMch9, iMch8, chAM1, chAM3, chAM5, chAM7, chAM9, chAM8] = rule_90(y)
-    [chAM1, iMch1] = initItemMemories (D, maxL, channels_v);
-    [chAM3, iMch3] = initItemMemories (D, maxL, channels_v_EEG);
-    [chAM5, iMch5] = initItemMemories (D, maxL, channels_v_GSR);
-    [chAM7, iMch7] = initItemMemories (D, maxL, channels_v_BVP);
-    [chAM9, iMch9] = initItemMemories (D, maxL, channels_v_RES);
-    [chAM8, iMch8] = initItemMemories (D, maxL, channels_v_EXG);
-    %Sparse biopolar mapping
-    %creates matrix of random hypervectors with element values 1, 0, and -1,
-    %matrix is has feature (channel) numbers of binary D size hypervectors
-    %Should be the S vectors
-%     projM1=projBRandomHV(D,channels_v,q);
-%     projM3=projBRandomHV(D,channels_v_EEG,q);
-%     projM5=projBRandomHV(D,channels_v_GSR,q);
-%     projM7=projBRandomHV(D,channels_v_BVP,q);
-%     projM9=projBRandomHV(D,channels_v_RES,q);
-%         iMch1 = zeros(channels_v, D);
-%     projM1_pos = zeros(channels_v, D);
-%     projM1_neg = zeros(channels_v, D);
-% 
-%     iMch3 = zeros(channels_v_EEG, D);
-%     projM3_pos = zeros(channels_v_EEG, D);
-%     projM3_neg = zeros(channels_v_EEG, D);
-% 
-%     iMch5 = zeros(channels_v_GSR, D);
-%     projM5_pos = zeros(channels_v_GSR, D);
-%     projM5_neg = zeros(channels_v_GSR, D);
-% 
-%     iMch7 = zeros(channels_v_BVP, D);
-%     projM7_pos = zeros(channels_v_BVP, D);
-%     projM7_neg = zeros(channels_v_BVP, D);
-% 
-%     iMch9 = zeros(channels_v_RES, D);
-%     projM9_pos = zeros(channels_v_RES, D);
-%     projM9_neg = zeros(channels_v_RES, D);
-    
-       combinations_necessary = max([channels_v_EEG, channels_v_GSR, channels_v, channels_v_BVP, channels_v_RES]);
-       total_vectors = combinations_necessary;
-
-   
-    
-    seed_vector = genRandomHV(D);
-    randSetVectors  = containers.Map ('KeyType','double','ValueType','any');
-    for i = 1:total_vectors
-        seed_vector = xor(circshift(seed_vector,1),circshift(seed_vector,-1));
-        randSetVectors(i) = seed_vector;
-    end
-
-
-    %generate first iM here for EEG and replicate it into each modality
-
-    %110x3 cell array of 1 iM and 2 proj
-    
-    for i = 1:1:channels_v_RES
-        randVs = randperm(total_vectors);
-        iMch9(i) = randSetVectors(randVs(i));
-       
-    end
-
-    for i = 1:1:channels_v_BVP
-        randVs = randperm(total_vectors);
-        iMch7(i) = randSetVectors(randVs(i));
-       
-    end
-
-    for i = 1:1:channels_v_GSR
-        randVs = randperm(total_vectors);
-        iMch5(i) = randSetVectors(randVs(i));
-       
-    end
-    
-    for i = 1:1:channels_v_EEG
-        randVs = randperm(total_vectors);
-        iMch3(i) = randSetVectors(randVs(i));
-       
-    end
-    
-    
-    for i = 1:1:channels_v
-        randVs = randperm(total_vectors);
-        iMch1(i) = randSetVectors(randVs(i));
-       
     end
 end

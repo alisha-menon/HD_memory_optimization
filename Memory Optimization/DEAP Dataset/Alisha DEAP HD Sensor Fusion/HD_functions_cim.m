@@ -1074,7 +1074,11 @@ function [accexc_alltrz, accExcTrnz, accuracy, predicLabel, actualLabel, all_err
     accuracy = correct / numTests;
     %accExcTrnz = (correct + tranzError) / numTests;
     accExcTrnz = correct / (numTests-tranzError);
-    accexc_alltrz = correctex/numtestex;
+    if (numtestex == 0)
+        accexc_alltrz = accuracy;
+    else
+        accexc_alltrz = correctex/numtestex;
+    end
   
 end
 function [predict_hamm, error, second_error] = hamming (q, aM, classes)

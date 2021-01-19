@@ -1,7 +1,8 @@
 
-function message = HD_functions_unoptimized
+function message = HD_functions
   assignin('base','genBRandomHV', @genBRandomHV); 
   assignin('base','projBRandomHV', @projBRandomHV); 
+  assignin('base','projRandomHV', @projRandomHV); 
   assignin('base','initItemMemories', @initItemMemories);
   assignin('base','projItemMemeory', @projItemMemeory); 
   assignin('base','computeNgramproj', @computeNgramproj); 
@@ -16,7 +17,7 @@ function message = HD_functions_unoptimized
   assignin('base','genTrainTestData', @genTrainTestData);
   assignin('base','lookupItemMemeory', @lookupItemMemeory);
   assignin('base','hamming', @hamming);
-  message='Importing all HD functions';
+  message='Importing all HDC functions';
 end
 
 function [L1, L2, L_SAMPL_DATA_train, SAMPL_DATA_train, L_SAMPL_DATA_test,SAMPL_DATA_test] = genTrainTestData (data, labels, trainingFrac, order,N)
@@ -317,6 +318,26 @@ function proj_m = projBRandomHV(D, F ,q)
                 end
             end
         end 
+   end
+end
+
+function proj_m = projRandomHV(D, F)
+%   D: dim
+%   F: number of features
+%   q: sparsity
+   rng('shuffle');
+   proj_m=zeros(F,D); 
+   %proj_m = [];
+   if mod(D,2)
+        disp ('Dimension is odd!!');
+   else   
+        %F_D=F*D;
+        %probM=rand(F,D);
+        %p_n1=(1-q)/2;
+        %p_p1=p_n1;
+       for k=1:F
+           proj_m(k,:) = genRandomHV (D);
+       end 
    end
 end
 
@@ -1072,7 +1093,11 @@ function [accexc_alltrz, accExcTrnz, accuracy, predicLabel, actualLabel, all_err
     accuracy = correct / numTests;
     %accExcTrnz = (correct + tranzError) / numTests;
     accExcTrnz = correct / (numTests-tranzError);
-    accexc_alltrz = correctex/numtestex;
+    if (numtestex == 0)
+        accexc_alltrz = accuracy;
+    else
+        accexc_alltrz = correctex/numtestex;
+    end
   
 end
 function [predict_hamm, error, second_error] = hamming (q, aM, classes)

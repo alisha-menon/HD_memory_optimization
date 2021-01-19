@@ -42,7 +42,7 @@ features_EEG=features(:,1+32+77:32+77+105);
 %% choose select
 % select = 1 for early fusion
 % select = 2 for late fusion
-select = 1;
+select = 2;
 if (select == 1)
     HD_functions_mod_reduced;     % load HD functions
 else 
@@ -69,7 +69,7 @@ COMPLETE_1_a_ECG=features_ECG;
 COMPLETE_1_v_EEG=features_EEG;
 COMPLETE_1_a_EEG=features_EEG;
 
-D_full = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]; %dimension of the hypervectors
+D_full = [10000]; %dimension of the hypervectors
 for j=1:length(D_full)
 learningFrac = learningrate(1); 
 learningFrac;
@@ -77,7 +77,7 @@ D=D_full(j);
 D
 classes = 2; % level of classes
 precision = 20; %no use
-ngram = 3; % for temporal encode
+ngram = 4; % for temporal encode
 maxL = 2; % for IM gen
  
 channels_v_EXG=channels_v +channels_v_ECG+channels_v_EEG;
@@ -229,7 +229,7 @@ projM6_neg(projM6==-1) = 0;
 projM6_pos(projM6==1) = 0;
 projM6_pos(projM6==-1) = 1;
 
-for N = 3:ngram
+for N = ngram:ngram
 % creates ngram for data, rotates through and 
 N
 

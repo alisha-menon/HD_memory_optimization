@@ -69,7 +69,7 @@ COMPLETE_1_a_ECG=features_ECG;
 COMPLETE_1_v_EEG=features_EEG;
 COMPLETE_1_a_EEG=features_EEG;
 
-D_full = [2000]; %dimension of the hypervectors
+D_full = [10000]; %dimension of the hypervectors
 for j=1:length(D_full)
 learningFrac = learningrate(1); 
 learningFrac;
@@ -229,7 +229,7 @@ projM6_neg(projM6==-1) = 0;
 projM6_pos(projM6==1) = 0;
 projM6_pos(projM6==-1) = 1;
 
-for N = 3:ngram
+for N = ngram:ngram
 % creates ngram for data, rotates through and 
 N
 

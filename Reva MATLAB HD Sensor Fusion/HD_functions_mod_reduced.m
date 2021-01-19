@@ -684,7 +684,7 @@ function [numPat, AM] = hdctrainproj (classes,labelTrainSet1, labelTrainSet2, la
     i = 1;
     label = labelTrainSet1 (1);
     
-    while i < length(labelTrainSet1)-N+1
+    while i <= length(labelTrainSet1)-N+1
        	if labelTrainSet1(i) == label  
         %creates ngram for label    
         %instead want to compute ngram which is fused, keep going if all
@@ -757,6 +757,7 @@ function [numPat, AM] = hdctrainproj (classes,labelTrainSet1, labelTrainSet2, la
     end    
     %wrap up the last training class
     labelTrainSet1(l)
+    trainVecList(1 , :) = 3;
     AM (labelTrainSet1 (l)) = mode (trainVecList); 
     am_index = 0;
     for label = 1:1:classes

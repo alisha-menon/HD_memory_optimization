@@ -380,7 +380,7 @@ function [numPat, AM] = hdctrainproj (classes,labelTrainSet1, labelTrainSet2, la
     label = labelTrainSet1 (1);
     
     while i < length(labelTrainSet1)-N+1
-       	if labelTrainSet1(i) == label  
+        if labelTrainSet1(i+N-1) == label 
         %creates ngram for label    
         %instead want to compute ngram which is fused, keep going if all
         %of the labels for the modalities are the same. Once one changes,
@@ -441,7 +441,8 @@ function [numPat, AM] = hdctrainproj (classes,labelTrainSet1, labelTrainSet2, la
             trainVecList(1 , :) = 3;
             label
             AM (label) = mode (trainVecList);
-            label = labelTrainSet1(i);
+            label = labelTrainSet1(i+N-1);
+            i = i+N-1;
             %numPat (label) = 0;
             trainVecList=zeros (1,D);
         end

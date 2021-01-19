@@ -69,7 +69,7 @@ learningFrac = learningrate(1);
 while (randCounter>0)
     rng('shuffle');
     
-    [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, projM1_pos, projM1_neg, projM3_pos, projM3_neg, projM5_pos, projM5_neg, projM7_pos, projM7_neg, projM9_pos, projM9_neg] = regular(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, q, initItemMemories, genRandomHV, projBRandomHV, randCounter);
+    [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, projM1_pos, projM1_neg, projM3_pos, projM3_neg, projM5_pos, projM5_neg, projM7_pos, projM7_neg, projM9_pos, projM9_neg] = rule_90(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, q, initItemMemories, genRandomHV, projBRandomHV, randCounter);
 
     
     for subject = 1:1:subjects
@@ -479,7 +479,7 @@ aaaaccuracy_matrix_data_ex_all = acc_matrix_ex_all;
 function vec_array = arrange_vectors(m)
     vec_array = [];
     m_copy = m;
-    if (mod(length(m_copy), 2)== 1)
+    if (mod(length(m_copy), 2)== 0)
         m_copy(end) = []; 
     end
     while (length(m_copy) > 2)
@@ -660,23 +660,23 @@ end
 function [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, projM1_pos, projM1_neg, projM3_pos, projM3_neg, projM5_pos, projM5_neg, projM7_pos, projM7_neg, projM9_pos, projM9_neg] = rule_90(channels_v, channels_v_EEG, channels_v_GSR, channels_v_BVP, channels_v_RES, channels_v_EXG, D, maxL, q, initItemMemories, genRandomHV, projBRandomHV, randCounter)
     [chAM8, iMch8] = initItemMemories (D, maxL, channels_v_EXG);
     
-    iMch1 = zeros(channels_v, D);
+    iMch1 = containers.Map ('KeyType','double','ValueType','any');
     projM1_pos = zeros(channels_v, D);
     projM1_neg = zeros(channels_v, D);
 
-    iMch3 = zeros(channels_v_EEG, D);
+    iMch3 = containers.Map ('KeyType','double','ValueType','any');
     projM3_pos = zeros(channels_v_EEG, D);
     projM3_neg = zeros(channels_v_EEG, D);
 
-    iMch5 = zeros(channels_v_GSR, D);
+    iMch5 = containers.Map ('KeyType','double','ValueType','any');
     projM5_pos = zeros(channels_v_GSR, D);
     projM5_neg = zeros(channels_v_GSR, D);
 
-    iMch7 = zeros(channels_v_BVP, D);
+    iMch7 = containers.Map ('KeyType','double','ValueType','any');
     projM7_pos = zeros(channels_v_BVP, D);
     projM7_neg = zeros(channels_v_BVP, D);
 
-    iMch9 = zeros(channels_v_RES, D);
+    iMch9 = containers.Map ('KeyType','double','ValueType','any');
     projM9_pos = zeros(channels_v_RES, D);
     projM9_neg = zeros(channels_v_RES, D);
     
@@ -685,8 +685,8 @@ function [iMch1, iMch3, iMch5, iMch7, iMch9, chAM8, projM1_pos, projM1_neg, proj
     total_vectors = 0;
 
     while (outputs < combinations_necessary)
-        outputs = vector_counter(total_vectors);
         total_vectors = total_vectors + 1;
+        outputs = vector_counter(total_vectors);
     end
     
     seed_vector = genRandomHV(D);

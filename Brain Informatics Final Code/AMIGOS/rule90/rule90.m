@@ -1,8 +1,8 @@
 clear;
 
 % set for simulation
-D_full = [1000, 2000]; %dimension of the hypervectors
-repetitions = 2;
+D_full = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]; %dimension of the hypervectors
+repetitions = 10;
 
 %====Features and Label===
 load('input_data.mat')

@@ -190,7 +190,7 @@ for j=1:repetitions
     
     for dim_loop = 1:1:length(D_full)
         D = D_full(dim_loop);
-        
+        rng('shuffle');
         [chAM1, iMch1] = initItemMemories (D, maxL, channels_v);
         %[chAM2, iMch2] = initItemMemories (D, maxL, channels_a);
         [chAM3, iMch3] = initItemMemories (D, maxL, channels_v_ECG);

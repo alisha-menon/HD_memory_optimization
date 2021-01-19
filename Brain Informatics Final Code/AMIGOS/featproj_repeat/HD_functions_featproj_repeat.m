@@ -191,7 +191,7 @@ function proj_m = projBRandomHV( D, F)
 %   D: dim
 %   F: number of features
 %   q: sparsity
-
+   rng('shuffle');
    proj_m=[]; 
    if mod(D,2)
         disp ('Dimension is odd!!');

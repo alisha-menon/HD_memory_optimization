@@ -187,6 +187,15 @@ for j=1:repetitions
     
     for dim_loop = 1:1:length(D_full)
         D = D_full(dim_loop);
+        rng('shuffle');
+        [chAM1, iMch1] = initItemMemories (D, maxL, channels_v);
+        %[chAM2, iMch2] = initItemMemories (D, maxL, channels_a);
+        [chAM3, iMch3] = initItemMemories (D, maxL, channels_v_ECG);
+        %[chAM4, iMch4] = initItemMemories (D, maxL, channels_a_ECG);
+        [chAM5, iMch5] = initItemMemories (D, maxL, channels_v_EEG);
+        %[chAM6, iMch6] = initItemMemories (D, maxL, channels_a_EEG);
+        [chAM7, iMch7] = initItemMemories (D, maxL, channels_v_EXG);
+        [chAM8, iMch8] = initItemMemories (D, maxL, channels_a_EXG);
         projM1_neg=projRandomHV(D,channels_v);
         projM1_pos=projRandomHV(D,channels_v);
         projM2_neg=projRandomHV(D,channels_a);
@@ -199,16 +208,6 @@ for j=1:repetitions
         projM5_pos=projRandomHV(D,channels_v_EEG);
         projM6_neg=projRandomHV(D,channels_a_EEG);
         projM6_pos=projRandomHV(D,channels_a_EEG);
-        
-        [chAM1, iMch1] = initItemMemories (D, maxL, channels_v);
-        %[chAM2, iMch2] = initItemMemories (D, maxL, channels_a);
-        [chAM3, iMch3] = initItemMemories (D, maxL, channels_v_ECG);
-        %[chAM4, iMch4] = initItemMemories (D, maxL, channels_a_ECG);
-        [chAM5, iMch5] = initItemMemories (D, maxL, channels_v_EEG);
-        %[chAM6, iMch6] = initItemMemories (D, maxL, channels_a_EEG);
-        [chAM7, iMch7] = initItemMemories (D, maxL, channels_v_EXG);
-        [chAM8, iMch8] = initItemMemories (D, maxL, channels_a_EXG);
-        
         % Arousal
         %generate ngram bundles for each data stream
         fprintf ('HDC for A\n');

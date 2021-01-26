@@ -135,12 +135,16 @@ function [L1, L2, L_SAMPL_DATA_train, SAMPL_DATA_train, L_SAMPL_DATA_test,SAMPL_
 	L7 = find (labels == 7);
     
     % want to select randomly of the labels to train
-    L1_length_train = floor(length(L1) * trainingFrac)/5;
-    L2_length_train = floor(length(L2) * trainingFrac)/5;
+    L1_length_train = floor(length(L1)/5);
+    L2_length_train = floor(length(L2)/5);
 
     
-    L1 = L1 (1 + round((kfold-1)*L1_length_train): round(kfold*L1_length_train));
-    L2 = L2 (1 + round((kfold-1)*L2_length_train): round(kfold*L2_length_train));
+    L1_t = L1 (1 + round((kfold-1)*L1_length_train): round(kfold*L1_length_train));
+    L2_t = L2 (1 + round((kfold-1)*L2_length_train): round(kfold*L2_length_train));
+    [a,id1] = intersect(L1,L1_t);
+    L1(id1) = [];
+    [a,id2] = intersect(L2,L2_t);
+    L2(id2) = [];
     %L1 = L1 (1 : floor(length(L1) * trainingFrac));
     %L2 = L2 (1 : floor(length(L2) * trainingFrac));
     L3 = L3 (1 : floor(length(L3) * trainingFrac));

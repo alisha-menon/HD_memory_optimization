@@ -710,6 +710,7 @@ for learn_count = 1:1:length(D_full)
         TS_COMPLETE_32 = TS_COMPLETE_32(rand_shuffle_2,:);
         TS_COMPLETE_42 = TS_COMPLETE_42(rand_shuffle_2,:);
         
+        %% kfold
         for kfold = 1:1:5
             [L1_1, L2_1, L_SAMPL_DATA_01_train, SAMPL_DATA_01_train, L_SAMPL_DATA_01_test, SAMPL_DATA_01_test] = genTrainTestDataKFold (TS_COMPLETE_01, L_TS_COMPLETE_01, learningFrac, 'inorder',N,kfold);
             [L1_2, L2_2, L_SAMPL_DATA_02_train, SAMPL_DATA_02_train, L_SAMPL_DATA_02_test, SAMPL_DATA_02_test] = genTrainTestDataKFold (TS_COMPLETE_02, L_TS_COMPLETE_02, learningFrac, 'inorder',N,kfold);
@@ -787,7 +788,7 @@ for learn_count = 1:1:length(D_full)
             reduced_L_SAMPL_DATA_1_test = L_SAMPL_DATA_01_test - 1;
             reduced_L_SAMPL_DATA_2_test = L_SAMPL_DATA_02_test - 1;
         
-            %% V
+            
             randCounter
             fprintf ('HDC for V\n');
             if (select == 1)
@@ -812,7 +813,7 @@ for learn_count = 1:1:length(D_full)
             accexc_alltrz_v
             fold_acc_v(1,kfold) = accexc_alltrz_v;
 
-            %% A
+            
             %randCounter
             fprintf ('HDC for A\n');
             if (select == 1)
@@ -837,6 +838,7 @@ for learn_count = 1:1:length(D_full)
             accexc_alltrz_a
             fold_acc_a(1,kfold) = accexc_alltrz_a;
         end
+        %% end kfold section
     mean(fold_acc_a), mean(fold_acc_v)
     kfold_accuracy_a(learn_count, subject) = mean(fold_acc_a);
     kfold_accuracy_v(learn_count, subject) = mean(fold_acc_v);

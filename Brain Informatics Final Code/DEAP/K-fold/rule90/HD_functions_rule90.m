@@ -108,7 +108,7 @@ function [L1, L2, L_SAMPL_DATA_train, SAMPL_DATA_train, L_SAMPL_DATA_test,SAMPL_
     SAMPL_DATA_test = remaining_data;
 end
 
-function [L1, L2, L_SAMPL_DATA_train, SAMPL_DATA_train, L_SAMPL_DATA_test,SAMPL_DATA_test] = genTrainTestDataKFold (data, labels, trainingFrac, order, N, kfold, rand_L1, rand_L2)
+function [L1, L2, L_SAMPL_DATA_train, SAMPL_DATA_train, L_SAMPL_DATA_test, SAMPL_DATA_test] = genTrainTestDataKFold (data, labels, trainingFrac, order, N, kfold, rand_L1, rand_L2)
 %
 % DESCRIPTION   : generates a dataset to train the alorithm using a fraction of the input data 
 %
@@ -134,12 +134,16 @@ function [L1, L2, L_SAMPL_DATA_train, SAMPL_DATA_train, L_SAMPL_DATA_test,SAMPL_
 	L7 = find (labels == 7);
     
     % want to select randomly of the labels to train
-    L1_length_train = floor(length(L1) * trainingFrac)/5;
-    L2_length_train = floor(length(L2) * trainingFrac)/5;
+    L1_length_train = floor(length(L1)/5);
+    L2_length_train = floor(length(L2)/5);
 
     
-    L1 = L1 (1 + round((kfold-1)*L1_length_train): round(kfold*L1_length_train));
-    L2 = L2 (1 + round((kfold-1)*L2_length_train): round(kfold*L2_length_train));
+    L1_t = L1 (1 + round((kfold-1)*L1_length_train): round(kfold*L1_length_train));
+    L2_t = L2 (1 + round((kfold-1)*L2_length_train): round(kfold*L2_length_train));
+    [a,id1] = intersect(L1,L1_t);
+    L1(id1) = [];
+    [a,id2] = intersect(L2,L2_t);
+    L2(id2) = [];
     %L1 = L1 (1 : floor(length(L1) * trainingFrac));
     %L2 = L2 (1 : floor(length(L2) * trainingFrac));
     L3 = L3 (1 : floor(length(L3) * trainingFrac));
@@ -188,6 +192,7 @@ function [L1, L2, L_SAMPL_DATA_train, SAMPL_DATA_train, L_SAMPL_DATA_test,SAMPL_
     remaining_data([L1(Inx1);L2(Inx2)],:) = [];
     L_SAMPL_DATA_test = remaining_labels;
     SAMPL_DATA_test = remaining_data;
+    
 end
 
 function [sample_data_train, sample_data_test] = select_traintest(L1, L2, data)

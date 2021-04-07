@@ -62,7 +62,6 @@ function [sample_data_train, sample_data_test] = select_traintest(L1, L2, data)
     sample_data_train = [data(L1,:); data(L2,:)];
     sample_data_test = data;
     sample_data_test([L1;L2],:) = [];
-    
 end
 
 function [L_SAMPL_DATA, SAMPL_DATA] = genTrainData (data, labels, trainingFrac, order)

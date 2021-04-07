@@ -436,11 +436,11 @@ function [accExcTrnz, accuracy, predicLabel, actualLabel] = hdcpredictproj (labe
 	tranzError = 0;
 	
    
-    for i = 1:1:length(testSet1)-N+1
+    for i = 1:1:length(labelTestSet1)-N+1
         
 		numTests = numTests + 1;
 		actualLabel(i : i+N-1,:) = mode(labelTestSet1 (i : i+N-1));
-       
+        
         sigHV1 = computeNgramproj (testSet1 (i : i+N-1,:), CiM, N, precision, iM, channels1,projM1);
         sigHV2 = computeNgramproj (testSet2 (i : i+N-1,:), CiM, N, precision, iM, channels2,projM2);
    	    sigHV3 = computeNgramproj (testSet3 (i : i+N-1,:), CiM, N, precision, iM, channels3,projM3);
